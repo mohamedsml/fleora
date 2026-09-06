@@ -1,0 +1,54 @@
+# ─── Secrets ─────────────────────────────────────────────────────────────
+# Jamais dans Git : mots de passe de base de données, clé d'application,
+# identifiants SMTP. Un secret poussé une fois reste dans l'historique même
+# après suppression — il faut alors le considérer comme compromis et le changer.
+.env
+.env.*
+!.env.example
+auth.json
+*.key
+*.pem
+
+# ─── Dépendances (réinstallables) ────────────────────────────────────────
+# Reconstruites par `composer install` / `npm install` à partir des fichiers
+# de verrouillage, qui eux SONT versionnés.
+vendor/
+node_modules/
+
+# ─── Build et compilation ────────────────────────────────────────────────
+public/build/
+public/hot
+public/storage
+.next/
+out/
+dist/
+
+# ─── Laravel : fichiers d'exécution ──────────────────────────────────────
+# Le contenu de storage est généré à l'exécution (logs, cache, sessions).
+# L'arborescence, elle, doit exister : voir les .gitignore internes de Laravel.
+fleora-admin/storage/framework/cache/*
+fleora-admin/storage/framework/sessions/*
+fleora-admin/storage/framework/views/*
+fleora-admin/storage/framework/testing/*
+fleora-admin/storage/logs/*
+fleora-admin/storage/app/public/*
+fleora-admin/storage/pail
+fleora-admin/bootstrap/cache/*.php
+
+# ─── Tests ───────────────────────────────────────────────────────────────
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+
+# ─── Éditeurs et OS ──────────────────────────────────────────────────────
+.idea/
+.vscode/
+.zed/
+.nova/
+.cursor/
+.codex/
+.phpactor.json
+_ide_helper.php
+.DS_Store
+Thumbs.db
+*.log
