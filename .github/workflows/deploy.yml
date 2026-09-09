@@ -139,6 +139,20 @@ jobs:
             set -e
             cd ${{ secrets.HOSTINGER_PATH }}
             export HEALTHCHECK_URL="https://fleora.multiweb.ca"
+
+            # Le script ne peut pas se déployer lui-même : si le serveur a été
+            # cloné avant son ajout, il faut d'abord récupérer le code.
+            if [ ! -f deploy/deploy.sh ]; then
+              echo "deploy/deploy.sh absent — récupération préalable du code…"
+              git fetch --quiet origin main
+              git merge --ff-only origin/main
+            fi
+
+            [ -f deploy/deploy.sh ] || {
+              echo "::error::deploy/deploy.sh introuvable après git pull. Vérifier HOSTINGER_PATH (actuellement le dossier $(pwd))."
+              exit 1
+            }
+
             chmod +x deploy/deploy.sh
             ./deploy/deploy.sh
 
