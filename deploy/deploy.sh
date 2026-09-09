@@ -59,13 +59,36 @@ if [ "$PHP_NUM" -lt 803 ] 2>/dev/null; then
 fi
 ok "PHP $PHP_VERSION ($PHP)"
 
-# Composer doit tourner avec le MÊME PHP, sinon il relit la version par défaut.
-if [ "$COMPOSER" = "composer" ] && command -v composer >/dev/null 2>&1; then
-    COMPOSER_PATH="$(command -v composer)"
-    case "$(head -c 2 "$COMPOSER_PATH" 2>/dev/null)" in
-        '#!') COMPOSER="$PHP $COMPOSER_PATH" ;;   # script : on impose notre PHP
-    esac
+# Composer doit tourner avec le MÊME PHP qu'artisan. Sur Hostinger, l'exécutable
+# `composer` utilise le PHP par défaut du système (8.2), pas celui du shell —
+# il refuse alors d'installer des dépendances qui exigent 8.3.
+#
+# On ne devine pas la nature de l'exécutable (script, binaire, wrapper) : on
+# vérifie la seule chose qui compte, la version de PHP que Composer voit.
+if [ "$COMPOSER" = "composer" ]; then
+    COMPOSER_PATH="$(command -v composer 2>/dev/null || true)"
+
+    if [ -n "$COMPOSER_PATH" ]; then
+        VU="$($COMPOSER_PATH --version 2>/dev/null | grep -oE 'PHP version [0-9]+\.[0-9]+' | grep -oE '[0-9]+\.[0-9]+' || echo '')"
+        NUM="$(echo "${VU:-0}" | awk -F. '{print $1*100+$2}')"
+
+        if [ "$NUM" -lt 803 ] 2>/dev/null; then
+            # Composer tourne sur un PHP trop ancien : on l'exécute via le nôtre.
+            log "Composer utilise PHP ${VU:-?} — bascule sur $PHP"
+            COMPOSER="$PHP $COMPOSER_PATH"
+        fi
+    else
+        # Pas de composer dans le PATH : le phar local est le repli habituel
+        # sur mutualisé.
+        for phar in composer.phar "$HOME/composer.phar" "$APP_DIR/composer.phar"; do
+            [ -f "$phar" ] && { COMPOSER="$PHP $phar"; break; }
+        done
+    fi
 fi
+
+# Vérification finale : mieux vaut échouer ici, avant la maintenance.
+COMPOSER_PHP="$($COMPOSER --version 2>/dev/null | grep -oE 'PHP version [0-9]+\.[0-9]+' || echo '')"
+[ -n "$COMPOSER_PHP" ] && ok "Composer sur ${COMPOSER_PHP#PHP version }"
 
 # ── Garde-fous ───────────────────────────────────────────────────────────
 # Sans .env, artisan échouerait à mi-parcours en laissant le site cassé.
