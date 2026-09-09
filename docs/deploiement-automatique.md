@@ -241,13 +241,24 @@ GitHub → dépôt **fleora** → Settings → Secrets and variables → Actions
 
 ---
 
-## Étape 8 — Protéger l'environnement de production *(recommandé)*
+## Étape 8 — Protéger l'environnement *(recommandé)*
 
-GitHub → Settings → **Environments** → New environment → `production` →
-cocher **Required reviewers** et vous ajouter.
+GitHub → Settings → **Environments** → `Hostinger Fleora` → cocher
+**Required reviewers** et vous ajouter.
 
 Effet : chaque déploiement demande une approbation explicite dans l'interface.
 Un second garde-fou en plus de la confirmation écrite.
+
+> ⚠️ **Le nom de l'environnement doit correspondre exactement.** Le workflow
+> déclare `environment: name: Hostinger Fleora` ; un secret rangé dans un
+> environnement au nom différent est **invisible** pour le job, qui échoue avec
+> « secrets manquants » alors que les secrets existent bel et bien. Si vous
+> renommez l'environnement, mettez à jour `.github/workflows/deploy.yml`.
+>
+> Les secrets peuvent aussi être placés en **Repository secrets** (visibles par
+> tous les workflows du dépôt, sans condition d'environnement) — mais les
+> secrets d'environnement sont préférables : ils permettent l'approbation
+> obligatoire ci-dessus.
 
 ---
 
