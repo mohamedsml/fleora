@@ -34,6 +34,18 @@ if grep -qE '^APP_DEBUG=(true|1)' .env; then
     fatal "APP_DEBUG=true en production : la page d'erreur exposerait le code et les identifiants de la base."
 fi
 
+# Marqueurs de .env.example laissés en place : sans ça, l'échec surviendrait
+# en pleine migration, après le passage en maintenance.
+if grep -q 'A_REMPLACER' .env; then
+    fatal ".env contient encore des marqueurs A_REMPLACER — renseigner les identifiants de la base (hPanel → Bases de données)."
+fi
+
+# « db » est le nom du service Docker Compose en développement ; il n'existe
+# pas sur le serveur.
+if grep -qE '^DB_HOST=db$' .env; then
+    fatal "DB_HOST=db est la valeur de développement local. En production : DB_HOST=localhost"
+fi
+
 # ── Sauvegarde de la base avant migration ────────────────────────────────
 # Une migration qui échoue à mi-chemin laisse le schéma dans un état
 # intermédiaire. Le dump permet de revenir en arrière.

@@ -80,10 +80,12 @@ jobs:
           DB_PASSWORD: root
         run: |
           cp .env.example .env
-          # .env.example pointe sur « db » (nom du service Docker Compose en
-          # local). Sur le runner, MariaDB est exposé sur 127.0.0.1.
-          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
-          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env
+          # .env.example porte des marqueurs A_REMPLACER pour la production.
+          # Ici, on pointe sur le service MariaDB du runner.
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/'      .env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=fleora_test/' .env
+          sed -i 's/^DB_USERNAME=.*/DB_USERNAME=root/'   .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/'   .env
           php artisan key:generate
           php artisan test
 
