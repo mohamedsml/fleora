@@ -1,0 +1,123 @@
+name: Déployer sur Hostinger
+
+# Déclenchement MANUEL uniquement : onglet Actions → « Déployer sur Hostinger »
+# → Run workflow. Un push sur main ne déploie rien tout seul — c'est voulu :
+# on choisit quand le site public change.
+on:
+  workflow_dispatch:
+    inputs:
+      environnement:
+        description: "Cible"
+        type: choice
+        options: [production]
+        default: production
+      confirmer:
+        description: "Taper « deployer » pour confirmer"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # ── 1. Vérifications avant de toucher au serveur ───────────────────────
+  verifier:
+    name: Vérifications
+    runs-on: ubuntu-latest
+
+    # Même moteur qu'en production : SQLite laisserait passer des erreurs de
+    # typage et de verrouillage que MariaDB refuse.
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: fleora_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=12
+
+    steps:
+      - name: Confirmation
+        if: inputs.confirmer != 'deployer'
+        run: |
+          echo "::error::Saisir « deployer » pour confirmer."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, zip, bcmath, gd, exif
+          coverage: none
+
+      - name: Dépendances
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Assets compilés présents
+        # Le serveur n'a pas Node : les assets sont construits en local et
+        # versionnés. Sans manifest, le site sort sans CSS.
+        run: |
+          test -f public/build/manifest.json \
+            || { echo "::error::public/build/manifest.json absent. Lancer 'npm run build' et commiter public/build/."; exit 1; }
+
+      - name: Style de code
+        run: vendor/bin/pint --test
+
+      - name: Tests
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: fleora_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: |
+          cp .env.example .env
+          # .env.example pointe sur « db » (nom du service Docker Compose en
+          # local). Sur le runner, MariaDB est exposé sur 127.0.0.1.
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env
+          php artisan key:generate
+          php artisan test
+
+  # ── 2. Déploiement ─────────────────────────────────────────────────────
+  deployer:
+    name: Déploiement
+    needs: verifier
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://fleora.multiweb.ca
+    steps:
+      - name: Connexion SSH et exécution
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd ${{ secrets.HOSTINGER_PATH }}
+            export HEALTHCHECK_URL="https://fleora.multiweb.ca"
+            chmod +x deploy/deploy.sh
+            ./deploy/deploy.sh
+
+      - name: Résumé
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "### ✅ Déployé sur https://fleora.multiweb.ca" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Échec du déploiement" >> $GITHUB_STEP_SUMMARY
+            echo "Vérifier \`storage/logs/laravel.log\` sur le serveur." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Commit : \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
