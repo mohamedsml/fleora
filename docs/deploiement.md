@@ -1,6 +1,6 @@
 # Déploiement sur Hostinger (hébergement mutualisé hPanel)
 
-Ce document décrit la mise en ligne de **fleora-admin** (Laravel + Filament).
+Ce document décrit la mise en ligne de **Fleora** (Laravel + Livewire + Filament).
 
 > **N'utilisez PAS l'écran « Vérifiez les paramètres de compilation » d'Hostinger.**
 > Cet outil déploie des sites *statiques* (Vite, React, Vue) : il exécute
@@ -48,8 +48,8 @@ Notez les quatre valeurs : **hôte** (souvent `localhost`), **nom de la base**,
 ssh -p 65002 uXXXXXX@votre-serveur.hostinger.com
 
 cd ~/domains/votredomaine.ca
-git clone https://github.com/mohamedsml/fleora.git app
-cd app/fleora-admin
+git clone https://github.com/mohamedsml/fleora.git fleora
+cd fleora
 
 composer install --no-dev --optimize-autoloader
 ```
@@ -130,7 +130,7 @@ App\Models\User::create([
 
 **C'est le point le plus important de tout ce document.**
 
-La racine web doit pointer sur `fleora-admin/public/`, et **jamais** sur la
+La racine web doit pointer sur `public/`, et **jamais** sur la
 racine du projet. Tout ce qui est au-dessus de `public/` doit rester
 inaccessible depuis le web : `.env` (mots de passe de la base), le code des
 modèles, les dépendances. Une racine mal placée expose ces fichiers à
@@ -140,7 +140,7 @@ Dans hPanel : **Sites web → Gérer → Avancé → Racine du document**, et
 indiquez :
 
 ```
-domains/votredomaine.ca/app/fleora-admin/public
+domains/votredomaine.ca/fleora/public
 ```
 
 ### Si hPanel ne permet pas de changer la racine
@@ -152,14 +152,14 @@ préférence :
 
 ```bash
 rm -rf ~/public_html
-ln -s ~/domains/votredomaine.ca/app/fleora-admin/public ~/public_html
+ln -s ~/domains/votredomaine.ca/fleora/public ~/public_html
 ```
 
 **b) `.htaccess` de redirection** à la racine de `public_html` :
 
 ```apache
 RewriteEngine On
-RewriteRule ^(.*)$ app/fleora-admin/public/$1 [L]
+RewriteRule ^(.*)$ fleora/public/$1 [L]
 ```
 
 Dans le cas (b), placez aussi ce `.htaccess` **à la racine du projet** pour
@@ -186,11 +186,11 @@ sur le serveur.
 1. **En local**, produisez le dossier de production :
 
    ```bash
-   cd fleora-admin
+   cd fleora
    composer install --no-dev --optimize-autoloader
    ```
 
-2. **Compressez** `fleora-admin/` en `.zip` — un seul fichier à transférer
+2. **Compressez** le projet en `.zip` — un seul fichier à transférer
    plutôt que 17 000.
 
 3. hPanel → **Fichiers → Gestionnaire de fichiers** → téléversez le `.zip`
@@ -210,6 +210,28 @@ sur le serveur.
 > **Vérifiez le quota d'inodes** avant de téléverser : le nombre de fichiers
 > est limité sur les offres mutualisées, et `vendor/` en consomme près de
 > 17 000 à lui seul. hPanel affiche ce quota dans la section des statistiques.
+
+---
+
+## 6 bis. Les assets compilés (CSS / JS)
+
+L'hébergement mutualisé n'exécute pas Node.js. Les assets sont donc compilés
+**en local** et déployés avec le code — `public/build/` est volontairement
+versionné pour cette raison.
+
+```bash
+# EN LOCAL, avant chaque commit qui touche au CSS/JS ou aux vues
+npm run build
+git add public/build && git commit && git push
+```
+
+> **Le piège à connaître** : si vous oubliez `npm run build`, le site servira
+> les anciens styles **sans aucune erreur visible**. Laravel lit seulement
+> `public/build/manifest.json` ; il ne sait pas que vos sources ont changé.
+> En cas de style qui « ne se met pas à jour » en production, c'est la
+> première chose à vérifier.
+
+Aucune commande npm n'est jamais à lancer sur le serveur.
 
 ---
 
@@ -235,9 +257,8 @@ Pour annuler : `php artisan optimize:clear`.
 ## 8. Mises à jour ultérieures
 
 ```bash
-cd ~/domains/votredomaine.ca/app
+cd ~/domains/votredomaine.ca/fleora
 git pull origin main
-cd fleora-admin
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 php artisan optimize:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache
@@ -258,18 +279,21 @@ php artisan optimize:clear && php artisan config:cache && php artisan route:cach
 
 ## Rappel : ce qui reste à construire
 
-Ce document déploie le **back-office** (`/admin`). Le **site public** n'existe
-pas encore — l'accueil affiche la page Laravel par défaut. La stack du site
-public devra être choisie en tenant compte d'une contrainte : un hébergement
-mutualisé **n'exécute pas Node.js en continu**, ce qui exclut un Next.js en
-rendu serveur. Trois options resteront ouvertes :
+Ce document déploie l'application complète : le **site public** (`/`) et le
+**back-office** (`/admin`), qui vivent dans le même projet Laravel.
 
-1. **Blade + Livewire** dans le même projet Laravel — aucun serveur
-   supplémentaire, un seul déploiement, excellent pour le SEO ;
-2. **Next.js en export statique** consommant l'API Laravel — à régénérer à
-   chaque modification de contenu ;
-3. **Next.js sur Vercel** (offre gratuite) pointant vers l'API Laravel
-   hébergée ici — deux hébergements à gérer.
+Ce qui existe : la page d'accueil et les trois écrans d'administration
+(créations, occasions, types de produit).
 
-L'option 1 est la plus cohérente avec un mutualisé et avec le fait que vous
-soyez seul à maintenir le projet.
+Ce qui manque, par ordre d'impact :
+
+1. **Les photos des créations** — le premier facteur de conversion pour du
+   décoratif, bien avant toute considération technique ;
+2. **Le formulaire de demande de soumission** (Livewire) — la conversion du site ;
+3. **Les pages d'occasions** — les pages piliers du référencement local ;
+4. Les pages galerie, à propos, contact et politique de confidentialité.
+
+La stack est arrêtée : **Laravel + Livewire + Tailwind + Alpine**, sans Next.js.
+Le rendu est fait côté serveur par Blade, ce qui donne déjà l'avantage SEO
+recherché ; ajouter un front JavaScript séparé imposerait d'écrire et de
+maintenir une API sans bénéfice visible pour les clientes.

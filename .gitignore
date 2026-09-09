@@ -16,24 +16,23 @@ vendor/
 node_modules/
 
 # ─── Build et compilation ────────────────────────────────────────────────
-public/build/
+# public/build/ est VOLONTAIREMENT versionné : l'hébergement mutualisé
+# n'exécute pas Node, les assets sont donc compilés en local (npm run build)
+# et déployés avec le code. Les ignorer casserait les styles en production.
 public/hot
 public/storage
-.next/
-out/
-dist/
 
 # ─── Laravel : fichiers d'exécution ──────────────────────────────────────
 # Le contenu de storage est généré à l'exécution (logs, cache, sessions).
 # L'arborescence, elle, doit exister : voir les .gitignore internes de Laravel.
-fleora-admin/storage/framework/cache/*
-fleora-admin/storage/framework/sessions/*
-fleora-admin/storage/framework/views/*
-fleora-admin/storage/framework/testing/*
-fleora-admin/storage/logs/*
-fleora-admin/storage/app/public/*
-fleora-admin/storage/pail
-fleora-admin/bootstrap/cache/*.php
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/storage/logs/*
+/storage/app/public/*
+/storage/pail
+/bootstrap/cache/*.php
 
 # ─── Tests ───────────────────────────────────────────────────────────────
 .phpunit.result.cache
