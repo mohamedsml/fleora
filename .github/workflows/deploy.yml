@@ -49,7 +49,7 @@ jobs:
           echo "::error::Saisir « deployer » pour confirmer."
           exit 1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -98,6 +98,37 @@ jobs:
       name: production
       url: https://fleora.multiweb.ca
     steps:
+      # Un secret manquant fait échouer l'action SSH avec un message opaque
+      # ("missing server host"). On nomme précisément ce qui manque.
+      - name: Secrets présents
+        env:
+          H: ${{ secrets.HOSTINGER_HOST }}
+          U: ${{ secrets.HOSTINGER_USER }}
+          P: ${{ secrets.HOSTINGER_PORT }}
+          K: ${{ secrets.HOSTINGER_SSH_KEY }}
+          D: ${{ secrets.HOSTINGER_PATH }}
+        run: |
+          manquants=""
+          [ -z "$H" ] && manquants="$manquants HOSTINGER_HOST"
+          [ -z "$U" ] && manquants="$manquants HOSTINGER_USER"
+          [ -z "$P" ] && manquants="$manquants HOSTINGER_PORT"
+          [ -z "$K" ] && manquants="$manquants HOSTINGER_SSH_KEY"
+          [ -z "$D" ] && manquants="$manquants HOSTINGER_PATH"
+
+          if [ -n "$manquants" ]; then
+            echo "::error::Secrets manquants :$manquants — les ajouter dans Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+          # Une clé collée sans sa ligne BEGIN est la cause la plus fréquente
+          # après l'absence pure et simple de secret.
+          case "$K" in
+            *"BEGIN"*"PRIVATE KEY"*) ;;
+            *) echo "::error::HOSTINGER_SSH_KEY ne ressemble pas à une clé privée. Copier le fichier ENTIER (~/.ssh/fleora_deploy), lignes BEGIN et END comprises."; exit 1 ;;
+          esac
+
+          echo "✓ Les cinq secrets sont renseignés"
+
       - name: Connexion SSH et exécution
         uses: appleboy/ssh-action@v1.2.0
         with:
