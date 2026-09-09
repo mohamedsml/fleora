@@ -46,7 +46,11 @@ services:
     restart: unless-stopped
     # Écrit les fichiers (cache, logs, migrations) avec l'UID de l'hôte
     # plutôt qu'en root — évite les fichiers root:root dans le dépôt.
-    user: "${UID:-1000}:${GID:-1000}"
+    #
+    # HOST_UID, pas UID : `UID` est en lecture seule dans bash, donc
+    # `UID=1000 docker compose ...` échoue silencieusement. Ces valeurs
+    # viennent de docker/.env, généré par `make up`.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     working_dir: /app
     command: php artisan serve --host=0.0.0.0 --port=8000
     ports:

@@ -2,14 +2,21 @@
 # Docker ne sert qu'au développement : la production tourne sur PHP/MariaDB
 # fournis par Hostinger, sans conteneur.
 
-DC := UID=$(shell id -u) GID=$(shell id -g) docker compose -f docker/compose.yaml
+DC := docker compose -f docker/compose.yaml
 
-.PHONY: help up down restart logs shell mysql migrate fresh test build ps
+.PHONY: help up down restart logs shell mysql migrate fresh test build ps env
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-up: ## Démarre l'environnement (app + base)
+# Compose lit automatiquement le .env placé à côté du fichier compose.
+# On y écrit l'UID/GID de l'hôte plutôt que de les passer en préfixe de
+# commande : `UID=...` échoue silencieusement, UID étant en lecture seule
+# dans bash.
+env:
+	@printf 'HOST_UID=%s\nHOST_GID=%s\n' "$$(id -u)" "$$(id -g)" > docker/.env
+
+up: env ## Démarre l'environnement (app + base)
 	$(DC) up -d
 	@echo "→ http://localhost:8000    (admin : /admin)"
 
@@ -40,5 +47,5 @@ fresh: ## Recrée la base et rejoue les seeds (DESTRUCTIF)
 test: ## Lance la suite de tests
 	$(DC) exec app php artisan test
 
-build: ## Reconstruit l'image PHP locale
+build: env ## Reconstruit l'image PHP locale
 	$(DC) build --no-cache
