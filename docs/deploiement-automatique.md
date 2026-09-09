@@ -122,18 +122,32 @@ App\Models\User::create([
 
 ---
 
-## Étape 5 — Pointer la racine web sur `public/`
+## Étape 5 — Exposer `public/` au web
 
 **L'étape la plus importante du document.**
 
-hPanel → **Sites web → fleora.multiweb.ca → Avancé → Racine du document** :
+Seul le dossier `public/` de Laravel doit être accessible par le web. Tout ce
+qui est au-dessus — `.env` (mot de passe de la base), `app/`, `config/`,
+`vendor/` — doit rester hors de portée.
 
-```
-domains/fleora.multiweb.ca/fleora/public
+> **Sur ce plan Hostinger, l'option « Racine du document » n'existe pas** :
+> `Avancé` ne propose que l'accès SSH, PHP, DNS, cron et Git. La racine est
+> figée sur `public_html`. On utilise donc un lien symbolique — vérifié
+> fonctionnel sur ce compte (Apache suit les liens).
+
+```bash
+cd ~/domains/fleora.multiweb.ca
+
+# Le default.php d'Hostinger n'a plus d'utilité — on le met de côté
+mv public_html/default.php ~/default.php.bak 2>/dev/null
+
+rmdir public_html && ln -s fleora/public public_html
+ls -la          # → public_html -> fleora/public
 ```
 
-> ⚠️ Sans cela, `.env` — qui contient le mot de passe de la base — est
-> téléchargeable par n'importe qui à l'adresse `fleora.multiweb.ca/.env`.
+Résultat : le web ne voit que `fleora/public`, exactement comme si la racine
+avait été déplacée. **Aucune modification du code**, et `git pull` continue de
+fonctionner normalement.
 
 **Vérifiez immédiatement après :**
 
@@ -141,6 +155,29 @@ domains/fleora.multiweb.ca/fleora/public
 curl -I https://fleora.multiweb.ca/.env      # doit répondre 403 ou 404, JAMAIS 200
 curl -I https://fleora.multiweb.ca           # doit répondre 200
 ```
+
+> Si `.env` répond 200, arrêtez tout : le mot de passe de votre base est
+> public. Vérifiez que `public_html` est bien un lien (`ls -la`), et non un
+> dossier contenant le projet.
+
+<details>
+<summary>Si les liens symboliques étaient refusés (autre hébergeur)</summary>
+
+Placer le projet dans `public_html/fleora/` et créer
+`public_html/.htaccess` :
+
+```apache
+RewriteEngine On
+RewriteRule ^(.*)$ /fleora/public/$1 [L]
+
+# L'application est sous la racine web : il faut bloquer explicitement
+RedirectMatch 404 ^/fleora/(?!public/).*$
+```
+
+Moins net que le lien symbolique — l'application reste techniquement
+accessible et dépend de règles de blocage. À n'utiliser qu'en dernier recours,
+avec la vérification `curl` ci-dessus.
+</details>
 
 ---
 

@@ -125,6 +125,16 @@ if [ -n "${HEALTHCHECK_URL:-}" ]; then
     sleep 2
     CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$HEALTHCHECK_URL" || echo 000)"
     [ "$CODE" = "200" ] && ok "HTTP $CODE" || fatal "HTTP $CODE — vérifier storage/logs/laravel.log"
+
+    # Le .env porte le mot de passe de la base. Sur mutualisé, la racine web
+    # est un lien vers public/ ; si ce lien était remplacé par un dossier
+    # (restauration, erreur de manipulation), tout le projet deviendrait
+    # public. On le vérifie à chaque déploiement plutôt qu'une seule fois.
+    ENV_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${HEALTHCHECK_URL%/}/.env" || echo 000)"
+    if [ "$ENV_CODE" = "200" ]; then
+        fatal ".env est accessible publiquement à ${HEALTHCHECK_URL%/}/.env — CHANGER LES IDENTIFIANTS DE LA BASE puis corriger la racine web."
+    fi
+    ok ".env non accessible (HTTP $ENV_CODE)"
 fi
 
 ok "Déploiement terminé : $(git log -1 --format='%h %s')"
