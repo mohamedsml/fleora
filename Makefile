@@ -1,0 +1,44 @@
+# Raccourcis de développement local.
+# Docker ne sert qu'au développement : la production tourne sur PHP/MariaDB
+# fournis par Hostinger, sans conteneur.
+
+DC := UID=$(shell id -u) GID=$(shell id -g) docker compose -f docker/compose.yaml
+
+.PHONY: help up down restart logs shell mysql migrate fresh test build ps
+
+help: ## Affiche cette aide
+	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+
+up: ## Démarre l'environnement (app + base)
+	$(DC) up -d
+	@echo "→ http://localhost:8000    (admin : /admin)"
+
+down: ## Arrête l'environnement
+	$(DC) down
+
+restart: ## Redémarre l'application
+	$(DC) restart app
+
+ps: ## Liste les conteneurs du projet
+	$(DC) ps
+
+logs: ## Suit les logs de l'application
+	$(DC) logs -f app
+
+shell: ## Ouvre un shell dans le conteneur applicatif
+	$(DC) exec app bash
+
+mysql: ## Ouvre un client MariaDB sur la base
+	$(DC) exec db mariadb -uroot -pdev fleora
+
+migrate: ## Applique les migrations
+	$(DC) exec app php artisan migrate
+
+fresh: ## Recrée la base et rejoue les seeds (DESTRUCTIF)
+	$(DC) exec app php artisan migrate:fresh --seed
+
+test: ## Lance la suite de tests
+	$(DC) exec app php artisan test
+
+build: ## Reconstruit l'image PHP locale
+	$(DC) build --no-cache

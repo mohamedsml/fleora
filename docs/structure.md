@@ -53,7 +53,11 @@ Fleora/
 │   └── deploiement.md       Mise en ligne sur Hostinger
 │
 ├── docker/                  ← Environnement de développement local
-│   └── Dockerfile.dev       Reproduit le PHP de l'hébergeur
+│   ├── compose.yaml         Deux services : app (PHP) + db (MariaDB)
+│   ├── Dockerfile.dev       Reproduit le PHP de l'hébergeur
+│   └── init/                Joué à la création du volume (base de test)
+│
+├── Makefile                 Raccourcis : make up, migrate, test…
 │
 └── deploy/                  ← Scripts de mise en ligne (à venir)
 ```
@@ -128,30 +132,41 @@ npm run build    # AVANT chaque commit touchant au CSS, au JS ou aux vues
 
 ## Développement local
 
-PHP 8.3 est installé sur la machine mais sans `pdo_mysql`. Un conteneur
-reproduit l'environnement de l'hébergeur — la production, elle, n'utilise pas
-Docker.
+PHP 8.3 est installé sur la machine mais sans `pdo_mysql`. Deux conteneurs
+reproduisent l'environnement de l'hébergeur — la production, elle, n'utilise
+pas Docker.
 
 ```bash
-# Construire l'image de dev (une seule fois)
-docker build -f docker/Dockerfile.dev -t fleora-php:dev .
-
-# Base de données
-docker run -d --name fleora-mariadb-dev --network fleora-dev \
-  -e MARIADB_ROOT_PASSWORD=dev -e MARIADB_DATABASE=fleora \
-  -p 3307:3306 mariadb:11.8
-
-# Serveur de développement → http://localhost:8000
-docker run -d --name fleora-serve --network fleora-dev -p 8000:8000 \
-  -v "$PWD:/app" -w /app fleora-php:dev \
-  php artisan serve --host=0.0.0.0 --port=8000
-
-# Tests (base fleora_test, à créer une fois)
-docker run --rm --network fleora-dev -v "$PWD:/app" -w /app \
-  fleora-php:dev php artisan test
+make up        # démarre app + db (attend que la base soit prête)
+make migrate
+make test
+make down      # arrêter
 ```
 
-Le back-office est sur `http://localhost:8000/admin`.
+`make` seul liste toutes les cibles. Le back-office est sur
+`http://localhost:8000/admin`.
+
+### Pourquoi deux conteneurs
+
+| Service | Image | Rôle |
+|---|---|---|
+| `app` | `fleora-php:dev` | PHP 8.3 + les extensions de l'hébergeur, lance `artisan serve` |
+| `db` | `mariadb:11.8` | La même version qu'en production |
+
+Séparer la base de l'application est la pratique standard : on redémarre l'une
+sans perdre l'autre, et la version de MariaDB reste identique à celle de
+l'hébergeur. Le fichier [`docker/compose.yaml`](../docker/compose.yaml) porte
+deux réglages qui évitent des pièges connus :
+
+- **`depends_on: condition: service_healthy`** — l'application ne démarre
+  qu'une fois la base réellement prête à accepter des connexions, pas seulement
+  lancée. Sans ça, la première migration échoue au hasard.
+- **`user: "${UID}:${GID}"`** — les fichiers écrits par le conteneur (cache,
+  logs, `package-lock.json`) appartiennent à ton utilisateur, pas à root.
+
+> **Note.** La production n'a pas de conteneur : Hostinger fournit PHP 8.3 et
+> MariaDB 11.8 directement. Docker ne sert qu'ici, parce que le PHP de la
+> machine de développement n'a pas `pdo_mysql`.
 
 ---
 

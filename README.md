@@ -15,34 +15,37 @@ Région de Montréal, Laval et Rive-Nord.
 
 ## Démarrer
 
-PHP 8.3 local n'a pas `pdo_mysql` : le développement passe par un conteneur qui
-reproduit l'environnement de l'hébergeur. La production, elle, n'utilise pas
-Docker.
+PHP 8.3 local n'a pas `pdo_mysql` : le développement passe par deux conteneurs
+(application + base) qui reproduisent l'environnement de l'hébergeur. La
+production, elle, n'utilise pas Docker — Hostinger fournit PHP et MariaDB.
 
 ```bash
-# 1. Image de dev (une seule fois)
-docker build -f docker/Dockerfile.dev -t fleora-php:dev .
-docker network create fleora-dev
+cp .env.example .env
 
-# 2. Base de données
-docker run -d --name fleora-mariadb-dev --network fleora-dev \
-  -e MARIADB_ROOT_PASSWORD=dev -e MARIADB_DATABASE=fleora \
-  -p 3307:3306 mariadb:11.8
+make up        # construit l'image, démarre app + base, attend que la base soit prête
+make migrate   # applique le schéma
+make test      # 31 tests
 
-# 3. Dépendances et configuration
-docker run --rm -v "$PWD:/app" -w /app fleora-php:dev composer install
-cp .env.example .env   # puis renseigner DB_* et lancer key:generate
-npm install && npm run build
-
-# 4. Schéma et données de démonstration
-docker run --rm --network fleora-dev -v "$PWD:/app" -w /app fleora-php:dev \
-  sh -c "php artisan migrate --force && php artisan db:seed --class=DemoSeeder --force"
-
-# 5. Serveur → http://localhost:8000
-docker run -d --name fleora-serve --network fleora-dev -p 8000:8000 \
-  -v "$PWD:/app" -w /app fleora-php:dev \
-  php artisan serve --host=0.0.0.0 --port=8000
+# → site   http://localhost:8000
+# → admin  http://localhost:8000/admin
 ```
+
+`make` sans argument liste toutes les cibles disponibles.
+
+| Commande | Effet |
+|---|---|
+| `make up` / `make down` | Démarre / arrête l'environnement |
+| `make logs` | Suit les logs applicatifs |
+| `make shell` | Ouvre un shell dans le conteneur PHP |
+| `make mysql` | Client MariaDB sur la base |
+| `make migrate` | Applique les migrations |
+| `make fresh` | Recrée la base + seeds (**destructif**) |
+| `make test` | Suite de tests |
+| `make build` | Reconstruit l'image PHP |
+
+Tout est décrit dans [`docker/compose.yaml`](docker/compose.yaml) : la base
+attend d'être `healthy` avant que l'application démarre, et les fichiers sont
+écrits avec ton UID plutôt qu'en root.
 
 ## Tests
 
@@ -50,13 +53,11 @@ Les tests tournent sur **MariaDB**, pas sur SQLite : SQLite ignore
 silencieusement `lockForUpdate` et tolère des types que MariaDB refuse — des
 tests verts y masqueraient des bugs de production.
 
-```bash
-# Créer la base de test (une seule fois)
-docker exec fleora-mariadb-dev mariadb -uroot -pdev \
-  -e "CREATE DATABASE IF NOT EXISTS fleora_test;"
+La base `fleora_test` est créée automatiquement au premier démarrage par
+[`docker/init/01-test-db.sql`](docker/init/01-test-db.sql).
 
-docker run --rm --network fleora-dev -v "$PWD:/app" -w /app \
-  fleora-php:dev php artisan test
+```bash
+make test
 ```
 
 ## Assets

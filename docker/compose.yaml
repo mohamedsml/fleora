@@ -1,0 +1,65 @@
+# Environnement de DÉVELOPPEMENT LOCAL uniquement.
+#
+# La production (Hostinger Cloud Startup) n'utilise pas Docker : l'hébergement
+# fournit déjà PHP 8.3, MariaDB 11.8 et les extensions nécessaires. Ces conteneurs
+# ne servent qu'à reproduire cet environnement sur la machine de développement,
+# dont le PHP local ne dispose pas de pdo_mysql.
+#
+# Usage depuis la racine du projet :
+#   docker compose -f docker/compose.yaml up -d        démarrer
+#   docker compose -f docker/compose.yaml down         arrêter
+#   docker compose -f docker/compose.yaml logs -f app  suivre les logs
+#   docker compose -f docker/compose.yaml exec app php artisan migrate
+#
+# Un raccourci `make` est disponible à la racine (voir Makefile).
+
+name: fleora
+
+services:
+  db:
+    image: mariadb:11.8
+    container_name: fleora-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-dev}
+      MARIADB_DATABASE: ${DB_DATABASE:-fleora}
+    ports:
+      # 3307 en local pour ne pas heurter un MySQL déjà installé sur le poste
+      - "${DB_PORT_HOST:-3307}:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      # Joué une seule fois, à la création du volume : crée fleora_test
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: fleora-php:dev
+    container_name: fleora-app
+    restart: unless-stopped
+    # Écrit les fichiers (cache, logs, migrations) avec l'UID de l'hôte
+    # plutôt qu'en root — évite les fichiers root:root dans le dépôt.
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ..:/app
+    environment:
+      # Surcharge le .env : dans le réseau Compose, la base s'appelle « db »
+      DB_HOST: db
+      DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
