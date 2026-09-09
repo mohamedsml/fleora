@@ -15,7 +15,28 @@ APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 
 BRANCHE="${DEPLOY_BRANCH:-main}"
-PHP="${PHP_BIN:-php}"
+# Hostinger expose deux PHP : celui du shell interactif (8.3) et celui des
+# commandes non interactives comme SSH depuis GitHub Actions (8.2 par défaut).
+# On cherche donc explicitement un PHP >= 8.3, requis par composer.json.
+detecter_php() {
+    [ -n "${PHP_BIN:-}" ] && { echo "$PHP_BIN"; return; }
+
+    for candidat in \
+        /opt/alt/php83/usr/bin/php \
+        /usr/local/php83/bin/php \
+        /opt/cpanel/ea-php83/root/usr/bin/php \
+        php83 php8.3 php
+    do
+        if command -v "$candidat" >/dev/null 2>&1; then
+            v="$("$candidat" -r 'echo PHP_MAJOR_VERSION*100+PHP_MINOR_VERSION;' 2>/dev/null || echo 0)"
+            [ "$v" -ge 803 ] 2>/dev/null && { echo "$candidat"; return; }
+        fi
+    done
+
+    echo "php"   # repli : le contrôle de version ci-dessous tranchera
+}
+
+PHP="$(detecter_php)"
 COMPOSER="${COMPOSER_BIN:-composer}"
 
 log()   { printf '\033[36m▸\033[0m %s\n' "$1"; }
@@ -23,6 +44,28 @@ ok()    { printf '\033[32m✓\033[0m %s\n' "$1"; }
 fatal() { printf '\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
 log "Déploiement dans $APP_DIR (branche $BRANCHE)"
+
+# ── Version de PHP ───────────────────────────────────────────────────────
+# Contrôlée AVANT le mode maintenance : un échec ici ne doit pas laisser le
+# site à l'arrêt.
+PHP_VERSION="$($PHP -r 'echo PHP_VERSION;' 2>/dev/null || echo inconnue)"
+PHP_NUM="$($PHP -r 'echo PHP_MAJOR_VERSION*100+PHP_MINOR_VERSION;' 2>/dev/null || echo 0)"
+
+if [ "$PHP_NUM" -lt 803 ] 2>/dev/null; then
+    fatal "PHP $PHP_VERSION ($PHP) — la 8.3 minimum est requise.
+       Hostinger sert une version différente en SSH non interactif.
+       Chercher le bon binaire :  ls -d /opt/alt/php8*/usr/bin/php
+       puis définir PHP_BIN dans le workflow (secret ou export)."
+fi
+ok "PHP $PHP_VERSION ($PHP)"
+
+# Composer doit tourner avec le MÊME PHP, sinon il relit la version par défaut.
+if [ "$COMPOSER" = "composer" ] && command -v composer >/dev/null 2>&1; then
+    COMPOSER_PATH="$(command -v composer)"
+    case "$(head -c 2 "$COMPOSER_PATH" 2>/dev/null)" in
+        '#!') COMPOSER="$PHP $COMPOSER_PATH" ;;   # script : on impose notre PHP
+    esac
+fi
 
 # ── Garde-fous ───────────────────────────────────────────────────────────
 # Sans .env, artisan échouerait à mi-parcours en laissant le site cassé.
@@ -75,8 +118,13 @@ fi
 log "Passage en maintenance…"
 $PHP artisan down --render="errors::503" --retry=60 2>/dev/null || true
 
-# Quoi qu'il arrive ensuite, on ressort de maintenance.
-trap '$PHP artisan up >/dev/null 2>&1 || true' EXIT
+# Quoi qu'il arrive ensuite, on ressort de maintenance. Si artisan lui-même
+# est cassé (mauvaise version de PHP, dépendances absentes), on retire le
+# verrou à la main : le site doit revenir en ligne même quand artisan échoue.
+sortir_maintenance() {
+    $PHP artisan up >/dev/null 2>&1 || rm -f storage/framework/maintenance.php
+}
+trap sortir_maintenance EXIT
 
 # ── Récupération du code ─────────────────────────────────────────────────
 log "Récupération de la branche $BRANCHE…"
