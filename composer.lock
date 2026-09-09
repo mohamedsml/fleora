@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7f2d1903e2fa88e115b6b912e3deaae",
+    "content-hash": "6a3fcaf0ca24e382f92fa8ed7dd7996d",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -3387,16 +3387,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v3.8.7",
+            "version": "v3.8.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "ff019f8f6f48b7a2315922e45a70ad8fd75d1934"
+                "reference": "ec19e5fb1e0b60df22ad15b901c2f7740267ba11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/ff019f8f6f48b7a2315922e45a70ad8fd75d1934",
-                "reference": "ff019f8f6f48b7a2315922e45a70ad8fd75d1934",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/ec19e5fb1e0b60df22ad15b901c2f7740267ba11",
+                "reference": "ec19e5fb1e0b60df22ad15b901c2f7740267ba11",
                 "shasum": ""
             },
             "require": {
@@ -3451,7 +3451,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v3.8.7"
+                "source": "https://github.com/livewire/livewire/tree/v3.8.8"
             },
             "funding": [
                 {
@@ -3459,7 +3459,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T15:40:46+00:00"
+            "time": "2026-09-07T16:02:29+00:00"
         },
         {
             "name": "masterminds/html5",
@@ -10804,5 +10804,5 @@
         "php": "^8.3"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
