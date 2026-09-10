@@ -22,3 +22,42 @@ Route::get('/', function () {
         'faqs' => Faq::publie()->surAccueil()->take(4)->get(),
     ]);
 })->name('accueil');
+
+/*
+|--------------------------------------------------------------------------
+| Créations
+|--------------------------------------------------------------------------
+| La galerie est un composant Livewire : les filtres vivent dans l'URL, donc
+| un lien filtré reste partageable et indexable.
+*/
+
+Route::view('/creations', 'pages.creations')->name('creations');
+
+Route::get('/creations/{slug}', function (string $slug) {
+    $creation = Creation::publie()
+        ->with(['media', 'occasions', 'productType'])
+        ->where('slug_fr', $slug)
+        ->firstOrFail();
+
+    return view('pages.creation-detail', [
+        'creation' => $creation,
+        // Même occasion : la suggestion la plus pertinente pour quelqu'un qui
+        // prépare un événement précis.
+        'similaires' => Creation::publie()
+            ->with(['media', 'occasions'])
+            ->whereKeyNot($creation->id)
+            ->when(
+                $creation->occasions->isNotEmpty(),
+                fn ($q) => $q->whereHas(
+                    'occasions',
+                    fn ($o) => $o->whereIn('occasions.id', $creation->occasions->pluck('id'))
+                )
+            )
+            ->take(3)
+            ->get(),
+    ]);
+})->name('creations.show');
+
+// Placeholder : la vraie page arrive avec le formulaire en 3 étapes.
+// Nommée dès maintenant pour que les CTA de la galerie pointent quelque part.
+Route::view('/demande', 'pages.demande')->name('demande');

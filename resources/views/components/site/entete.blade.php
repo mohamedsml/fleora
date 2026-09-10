@@ -1,7 +1,10 @@
 @php
+    // route() plutôt qu'url() dès qu'une route nommée existe : le lien suit
+    // automatiquement si l'URL change. Les autres pages ne sont pas encore
+    // construites, d'où le url() provisoire.
     $liens = [
-        ['url' => url('/'), 'libelle' => 'Accueil'],
-        ['url' => url('/creations'), 'libelle' => 'Créations'],
+        ['url' => route('accueil'), 'libelle' => 'Accueil'],
+        ['url' => route('creations'), 'libelle' => 'Créations'],
         ['url' => url('/occasions'), 'libelle' => 'Occasions'],
         ['url' => url('/a-propos'), 'libelle' => 'À propos'],
         ['url' => url('/contact'), 'libelle' => 'Contact'],
