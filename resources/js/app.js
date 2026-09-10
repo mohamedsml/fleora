@@ -1,12 +1,19 @@
-import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 
-// Alpine pilote le menu mobile et les petits états d'interface du site
-// public. Le back-office Filament embarque sa propre instance ; celle-ci ne
-// sert qu'aux pages Blade.
-Alpine.plugin(collapse);
-window.Alpine = Alpine;
-Alpine.start();
+/*
+ * Alpine vient de Livewire, on ne l'importe PAS séparément.
+ *
+ * Livewire embarque sa propre instance d'Alpine et la démarre lui-même. En
+ * important puis en lançant une seconde instance ici, les deux entrent en
+ * conflit : Livewire ne peut plus se brancher, et tous les `wire:click`
+ * deviennent inertes — sans la moindre erreur en console.
+ *
+ * Le hook `livewire:init` s'exécute avant le démarrage d'Alpine par Livewire :
+ * c'est le bon endroit pour enregistrer une extension.
+ */
+document.addEventListener('livewire:init', () => {
+    window.Alpine.plugin(collapse);
+});
 
 /**
  * Apparition progressive des sections au défilement.

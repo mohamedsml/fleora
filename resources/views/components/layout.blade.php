@@ -27,6 +27,12 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Livewire fournit Alpine à TOUTES les pages, y compris celles sans
+         composant Livewire : l'en-tête utilise Alpine pour son menu mobile.
+         Sans cette directive, Livewire ne s'injecte que sur les pages qui
+         portent un composant, et le menu casse ailleurs. --}}
+    @livewireStyles
+
     {{-- Données structurées : permet à Google d'afficher les coordonnées et
          la zone desservie directement dans les résultats de recherche. --}}
     {{ $schema ?? '' }}
@@ -46,5 +52,8 @@
     </main>
 
     <x-site.pied />
+
+    {{-- En fin de body : le DOM doit exister avant qu'Alpine ne s'y branche. --}}
+    @livewireScripts
 </body>
 </html>
