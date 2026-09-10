@@ -21,6 +21,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use RuntimeException;
+use Saade\FilamentLaravelLog\FilamentLaravelLogPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -103,6 +104,28 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->plugins([
+                /*
+                 * Lecteur de logs dans l'administration.
+                 *
+                 * Sur un hébergement mutualisé, diagnostiquer une erreur 500
+                 * demandait une session SSH. Cet écran donne la même
+                 * information depuis le navigateur.
+                 *
+                 * ⚠️ Les logs contiennent des traces d'exception : chemins du
+                 * serveur, extraits de code, parfois des données de requête.
+                 * L'écran hérite de l'authentification du panneau, et
+                 * `authorize` en restreint l'accès au-delà.
+                 */
+                FilamentLaravelLogPlugin::make()
+                    ->navigationGroup('Système')
+                    ->navigationLabel('Journaux')
+                    ->navigationIcon('heroicon-o-document-text')
+                    ->navigationSort(99)
+                    // Réservé aux comptes actifs : un compte désactivé qui
+                    // garderait une session ouverte ne doit pas lire les logs.
+                    ->authorize(fn () => (bool) auth()->user()?->actif),
+            ])
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,

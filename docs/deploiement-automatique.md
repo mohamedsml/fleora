@@ -316,10 +316,20 @@ le port (`65002`) et la clé privée copiée en entier.
 
 **Le site affiche une erreur 500 après déploiement :**
 
+Le plus simple est le lecteur de logs de l'administration :
+**https://fleora.ca/admin/logs** — filtrage par niveau, recherche, et pas
+besoin de session SSH.
+
+En SSH si l'administration est elle-même inaccessible :
+
 ```bash
 ssh -p 65002 uXXXXXX@votre-serveur.hostinger.com
 cd ~/domains/fleora.ca/fleora
 tail -50 storage/logs/laravel.log
+
+# La cause la plus fréquente après un changement de .env : un cache périmé
+/opt/alt/php83/usr/bin/php artisan optimize:clear
+/opt/alt/php83/usr/bin/php artisan optimize
 ```
 
 **Revenir au commit précédent :**
