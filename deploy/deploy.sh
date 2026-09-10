@@ -112,6 +112,13 @@ if grep -qE '^DB_HOST=db$' .env; then
     fatal "DB_HOST=db est la valeur de développement local. En production : DB_HOST=localhost"
 fi
 
+# Connexion automatique à l'admin : réservée au développement. Activée ici,
+# elle ouvrirait le back-office — demandes clientes, devis, factures — sans
+# authentification.
+if grep -qiE '^FLEORA_AUTO_LOGIN=(true|1)' .env; then
+    fatal "FLEORA_AUTO_LOGIN est activé : l'administration serait accessible sans mot de passe. Retirer cette ligne du .env du serveur."
+fi
+
 # ── Sauvegarde de la base avant migration ────────────────────────────────
 # Une migration qui échoue à mi-chemin laisse le schéma dans un état
 # intermédiaire. Le dump permet de revenir en arrière.

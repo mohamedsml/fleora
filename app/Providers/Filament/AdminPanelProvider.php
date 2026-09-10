@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\User;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,10 +18,75 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use RuntimeException;
 
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Connexion automatique en développement local.
+     *
+     * ⚠️ Contourne l'authentification de l'administration. Trois verrous
+     * indépendants l'empêchent de s'exécuter ailleurs qu'en local :
+     * la variable FLEORA_AUTO_LOGIN (absente = désactivé), l'environnement
+     * réel de l'application, et l'origine privée de la requête.
+     *
+     * Fait dans boot() plutôt qu'en middleware : Filament place son propre
+     * Authenticate en tête de la pile du panneau, quelle que soit la position
+     * déclarée — un middleware s'exécuterait après la redirection.
+     */
+    public function boot(): void
+    {
+        if (! config('fleora.auto_login')) {
+            return;
+        }
+
+        if (! app()->environment('local')) {
+            throw new RuntimeException(
+                'FLEORA_AUTO_LOGIN est activé hors environnement local. '
+                .'Retirez-le du .env de ce serveur : l’administration serait '
+                .'accessible sans mot de passe.'
+            );
+        }
+
+        if (! $this->requetePrivee()) {
+            return;
+        }
+
+        if (! Auth::check()) {
+            // Le plus ancien compte : celui créé à l'installation.
+            if ($utilisateur = User::query()->oldest('id')->first()) {
+                Auth::login($utilisateur);
+            }
+        }
+    }
+
+    /**
+     * Vrai pour localhost, le réseau Docker et un LAN — faux pour toute
+     * adresse routable sur Internet.
+     */
+    private function requetePrivee(): bool
+    {
+        $ip = request()->ip();
+
+        if ($ip === null) {
+            return false;
+        }
+
+        if (in_array($ip, ['127.0.0.1', '::1'], true)) {
+            return true;
+        }
+
+        // FILTER_FLAG_NO_PRIV_RANGE fait échouer la validation pour une IP
+        // privée : un échec signifie donc « privée », ce qu'on veut ici.
+        return filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) === false;
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel

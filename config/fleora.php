@@ -67,4 +67,22 @@ return [
         'max_piece_jointe_mo' => 5,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Connexion automatique (développement uniquement)
+    |--------------------------------------------------------------------------
+    |
+    | Connecte le premier administrateur sans saisie de mot de passe, pour
+    | éviter de se reconnecter à chaque redémarrage local.
+    |
+    | ⚠️ Ne JAMAIS activer ailleurs qu'en local : l'administration — donc les
+    | demandes clientes, les devis et les factures — serait accessible sans
+    | authentification. Le middleware refuse de fonctionner si APP_ENV n'est
+    | pas « local », mais la première protection reste de ne pas mettre cette
+    | variable dans le .env du serveur.
+    |
+    */
+
+    'auto_login' => env('FLEORA_AUTO_LOGIN', false),
+
 ];

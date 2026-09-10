@@ -19,6 +19,10 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- La connexion automatique est un outil de développement : elle ne
+             doit jamais s'activer pendant les tests, sauf ceux qui la ciblent
+             explicitement (ils la réactivent via config()). -->
+        <env name="FLEORA_AUTO_LOGIN" value="(false)"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
