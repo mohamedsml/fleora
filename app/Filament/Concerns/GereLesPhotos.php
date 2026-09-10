@@ -59,15 +59,31 @@ trait GereLesPhotos
         $conserves = [];
 
         foreach ($this->photosATraiter as $entree) {
-            // Une entrée déjà en base = photo existante réordonnée.
-            // Filament renvoie alors son chemin, pas un fichier.
+            // Filament écrit lui-même les fichiers téléversés — c'est la seule
+            // façon qu'il sache réafficher les photos existantes à la
+            // réouverture de la fiche. On reçoit donc toujours un chemin, qui
+            // recouvre deux cas.
             if (is_string($entree)) {
-                Media::where('mediable_type', $enregistrement->getMorphClass())
+                $media = Media::where('mediable_type', $enregistrement->getMorphClass())
                     ->where('mediable_id', $enregistrement->getKey())
                     ->where('chemin', $entree)
-                    ->update(['ordre' => $ordre++]);
+                    ->first();
 
-                $conserves[] = $entree;
+                if ($media) {
+                    // Photo déjà connue : seul son rang peut avoir changé.
+                    $media->update(['ordre' => $ordre++]);
+                    $conserves[] = $media->chemin;
+
+                    continue;
+                }
+
+                // Fichier tout juste écrit par Filament : il n'a pas encore de
+                // variantes WebP. On le confie à ImageService, qui les génère
+                // et réencode l'original.
+                if (Storage::disk('public')->exists($entree)) {
+                    $media = $service->adopter($entree, $enregistrement, ['ordre' => $ordre++]);
+                    $conserves[] = $media->chemin;
+                }
 
                 continue;
             }

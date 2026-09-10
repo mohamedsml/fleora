@@ -149,6 +149,36 @@ class PhotosBackOfficeTest extends TestCase
     }
 
     #[Test]
+    public function il_traite_un_fichier_deja_ecrit_par_filament(): void
+    {
+        // Le vrai parcours du navigateur : Filament écrit le fichier sur le
+        // disque et renvoie son chemin, pas un UploadedFile. Sans ce cas, la
+        // photo resterait sans variantes WebP — servie en pleine résolution.
+        $creation = Creation::create(['titre_fr' => 'Coffret', 'slug_fr' => 'coffret']);
+
+        $chemin = 'media/creations/depose-par-filament.jpg';
+        Storage::disk('public')->put(
+            $chemin,
+            $this->photo(1600, 2000)->get()
+        );
+
+        Livewire::test(EditCreation::class, ['record' => $creation->getKey()])
+            ->fillForm(['photos' => [$chemin]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $media = $creation->fresh()->media->first();
+
+        $this->assertNotNull($media);
+        $this->assertSame('image/webp', $media->mime);
+        $this->assertNotEmpty($media->variantes);
+
+        // Le fichier d'origine a été remplacé par sa version WebP.
+        Storage::disk('public')->assertMissing($chemin);
+        Storage::disk('public')->assertExists($media->chemin);
+    }
+
+    #[Test]
     public function une_creation_sans_photo_reste_valide(): void
     {
         // On saisit souvent la fiche avant d'avoir les photos.

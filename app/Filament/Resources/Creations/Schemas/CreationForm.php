@@ -85,10 +85,13 @@ class CreationForm
                             ])
                             ->maxSize(10 * 1024)
                             ->maxFiles(12)
-                            // Les fichiers sont conservés en mémoire : c'est
-                            // ImageService qui les écrit, après réencodage et
-                            // génération des variantes WebP.
-                            ->storeFiles(false)
+                            // Filament écrit les fichiers lui-même : c'est la
+                            // seule façon qu'il sache réafficher les photos
+                            // déjà enregistrées à la réouverture de la fiche.
+                            // ImageService reprend ensuite chaque fichier pour
+                            // générer les variantes WebP.
+                            ->disk('public')
+                            ->directory('media/creations')
                             ->helperText('JPG, PNG, WebP ou HEIC — 10 Mo maximum par photo. Les formats optimisés pour le web sont générés automatiquement.')
                             ->columnSpanFull(),
                     ]),

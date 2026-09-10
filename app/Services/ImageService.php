@@ -80,6 +80,52 @@ class ImageService
     }
 
     /**
+     * Prend en charge un fichier déjà écrit sur le disque.
+     *
+     * Filament stocke lui-même les fichiers téléversés — c'est la seule façon
+     * qu'il sache réafficher les photos existantes à la réouverture d'une
+     * fiche. On reprend donc le fichier en place : réencodage en WebP,
+     * génération des variantes, puis suppression de l'original si son format
+     * différait.
+     *
+     * @param  string  $chemin  Chemin relatif sur le disque `public`
+     */
+    public function adopter(string $chemin, Model $mediable, array $attributs = []): Media
+    {
+        $disque = $attributs['disque'] ?? 'public';
+        $dossier = $this->dossierPour($mediable);
+        $base = Str::uuid()->toString();
+
+        $image = $this->manager->read(Storage::disk($disque)->path($chemin));
+
+        // Réencodage systématique : neutralise une charge utile dissimulée
+        // dans un fichier qui se présente comme une image.
+        $cheminOriginal = "{$dossier}/{$base}.webp";
+        Storage::disk($disque)->put(
+            $cheminOriginal,
+            (string) $image->toWebp(self::QUALITE)
+        );
+
+        $variantes = $this->genererVariantes($image, $disque, $dossier, $base);
+
+        // Le fichier déposé par Filament n'a plus d'utilité.
+        if ($chemin !== $cheminOriginal) {
+            Storage::disk($disque)->delete($chemin);
+        }
+
+        return $mediable->media()->create([
+            ...$attributs,
+            'chemin' => $cheminOriginal,
+            'disque' => $disque,
+            'mime' => 'image/webp',
+            'taille' => Storage::disk($disque)->size($cheminOriginal),
+            'largeur' => $image->width(),
+            'hauteur' => $image->height(),
+            'variantes' => $variantes,
+        ]);
+    }
+
+    /**
      * (Re)génère les variantes d'un média existant.
      * Utile après un changement de la liste des largeurs.
      */
