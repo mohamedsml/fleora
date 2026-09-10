@@ -353,11 +353,37 @@ php artisan up
 
 ## Cron du planificateur
 
-Une seule fois, hPanel → Avancé → **Tâches cron** :
+Une seule fois, hPanel → Avancé → **Tâches cron**.
+
+**Choisir « Personnalisé », pas « PHP ».** Le mode PHP impose `/usr/bin/php`
+(version 8.2) et n'accepte qu'un chemin de fichier, pas une commande Artisan.
+
+Commande :
 
 ```
-* * * * * cd ~/domains/fleora.multiweb.ca/fleora && php artisan schedule:run >> /dev/null 2>&1
+cd /home/u663068008/domains/fleora.multiweb.ca/fleora && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Il porte les sauvegardes planifiées, les purges Loi 25 et les rappels
-d'événements approchants.
+Fréquence : `*` dans les cinq champs (chaque minute). Laravel décide ensuite
+lui-même quelles tâches exécuter.
+
+> ⚠️ **Deux pièges, tous deux vérifiés sur ce serveur.**
+>
+> **Le chemin de PHP.** `php` tout court donne **8.2.33** en contexte non
+> interactif (cron, SSH automatisé), alors que le shell interactif donne
+> 8.3.33. Le projet exige 8.3 : il faut le chemin complet
+> `/opt/alt/php83/usr/bin/php`. C'est la même cause qui a fait échouer les
+> premiers déploiements GitHub Actions.
+>
+> **Le chemin du projet.** Écrire `/home/u663068008/domains/...` en absolu :
+> `~` n'est pas toujours interprété par cron.
+
+Le planificateur portera les sauvegardes quotidiennes, les purges Loi 25 et les
+rappels d'événements approchants. Tant qu'aucune tâche n'est déclarée dans
+`routes/console.php`, il ne fait rien — c'est normal.
+
+Vérifier ce qui est planifié :
+
+```bash
+php artisan schedule:list
+```
