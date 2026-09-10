@@ -54,3 +54,6 @@ Thumbs.db
 
 # Généré par `make env` — UID/GID de la machine locale
 /docker/.env
+
+# Empreinte du dernier composer install (deploy.sh)
+/.composer-lock-hash

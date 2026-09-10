@@ -4,7 +4,7 @@
 #
 # Exécuté sur le SERVEUR, soit par GitHub Actions (workflow deploy.yml),
 # soit à la main par SSH :
-#     cd ~/domains/fleora.multiweb.ca/fleora && ./deploy/deploy.sh
+#     cd ~/domains/fleora.ca/fleora && ./deploy/deploy.sh
 #
 # Le script est idempotent : le relancer sans changement ne casse rien.
 
@@ -174,10 +174,22 @@ fi
 
 # ── Dépendances PHP ──────────────────────────────────────────────────────
 # --no-dev : ni PHPUnit ni outils de débogage en production.
-if [ "$AVANT" != "$APRES" ] || [ ! -d vendor ]; then
+#
+# On compare composer.lock à l'empreinte du dernier install réussi, plutôt que
+# de se fier au seul écart de commits : un `git pull` lancé à la main avant ce
+# script laisse AVANT == APRES, Composer est sauté, et l'application référence
+# une classe absente de vendor/ — erreur 500 sur tout le site.
+EMPREINTE=".composer-lock-hash"
+LOCK_ACTUEL="$(md5sum composer.lock 2>/dev/null | cut -d' ' -f1)"
+LOCK_INSTALLE="$(cat "$EMPREINTE" 2>/dev/null || echo '')"
+
+if [ ! -d vendor ] || [ "$LOCK_ACTUEL" != "$LOCK_INSTALLE" ]; then
     log "Installation des dépendances…"
     $COMPOSER install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+    echo "$LOCK_ACTUEL" > "$EMPREINTE"
     ok "Dépendances à jour"
+else
+    log "Dépendances inchangées."
 fi
 
 # ── Base de données ──────────────────────────────────────────────────────
