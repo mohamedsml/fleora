@@ -105,7 +105,7 @@ Puis :
 ```bash
 php artisan key:generate
 php artisan migrate --force
-php artisan storage:link
+php artisan storage:link     # rend les photos téléversées accessibles au web
 php artisan optimize
 ```
 

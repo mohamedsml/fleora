@@ -4,7 +4,7 @@
 
 DC := docker compose -f docker/compose.yaml
 
-.PHONY: help up down restart logs shell mysql migrate fresh test build ps env
+.PHONY: help up down restart logs shell mysql migrate fresh test build ps env lien
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -18,7 +18,15 @@ env:
 
 up: env ## Démarre l'environnement (app + base)
 	$(DC) up -d
+	@$(MAKE) --no-print-directory lien
 	@echo "→ http://localhost:8000    (admin : /admin)"
+
+lien: ## (Re)crée le lien public/storage vers les médias
+	@# Lien RELATIF : `artisan storage:link` depuis le conteneur écrirait
+	@# /app/storage/..., un chemin qui n'existe pas sur la machine hôte.
+	@rm -f public/storage
+	@ln -s ../storage/app/public public/storage
+	@echo "public/storage → $$(readlink public/storage)"
 
 down: ## Arrête l'environnement
 	$(DC) down

@@ -185,8 +185,14 @@ log "Migrations…"
 $PHP artisan migrate --force --no-interaction
 ok "Schéma à jour"
 
-# Lien symbolique vers les médias téléversés (idempotent)
-[ -L public/storage ] || $PHP artisan storage:link --no-interaction || true
+# Lien symbolique vers les médias téléversés.
+# `-e` plutôt que `-L` : un lien peut exister tout en pointant nulle part
+# (restauration de sauvegarde, copie de fichiers entre environnements). Les
+# photos disparaîtraient du site sans qu'aucune erreur ne le signale.
+if [ ! -e public/storage ]; then
+    rm -f public/storage
+    $PHP artisan storage:link --no-interaction || true
+fi
 
 # ── Caches ───────────────────────────────────────────────────────────────
 # optimize:clear d'abord : un cache de config obsolète pointerait sur les

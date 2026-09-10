@@ -42,6 +42,7 @@ make test      # 31 tests
 | `make fresh` | Recrée la base + seeds (**destructif**) |
 | `make test` | Suite de tests |
 | `make build` | Reconstruit l'image PHP |
+| `make lien` | (Re)crée `public/storage` — les photos téléversées |
 
 Tout est décrit dans [`docker/compose.yaml`](docker/compose.yaml) : la base
 attend d'être `healthy` avant que l'application démarre, et les fichiers sont
