@@ -69,6 +69,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Coordonnées
+    |--------------------------------------------------------------------------
+    |
+    | Le NAP (nom, adresse, téléphone) doit rester identique au caractère près
+    | à celui du Google Business Profile : une adresse écrite différemment sur
+    | deux sources affaiblit le signal de référencement local.
+    |
+    */
+
+    'contact' => [
+        'courriel' => env('FLEORA_COURRIEL', 'contact@fleora.ca'),
+        'telephone' => env('FLEORA_TELEPHONE', ''),
+        'whatsapp' => env('FLEORA_WHATSAPP', ''),
+        'ville' => env('FLEORA_VILLE', 'Laval'),
+        'region' => 'QC',
+        'delai_reponse_h' => 24,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Palettes proposées dans le formulaire
+    |--------------------------------------------------------------------------
+    |
+    | Pastilles cliquables plutôt qu'un champ libre : la saisie est plus rapide
+    | sur mobile, et les réponses restent exploitables pour la production.
+    | `hex` sert uniquement à l'aperçu visuel.
+    |
+    */
+
+    'palettes' => [
+        'blush' => ['libelle' => 'Blush', 'hex' => '#E8C4C0'],
+        'ivoire' => ['libelle' => 'Ivoire', 'hex' => '#F7F4EF'],
+        'sauge' => ['libelle' => 'Sauge', 'hex' => '#A8B5A0'],
+        'terracotta' => ['libelle' => 'Terracotta', 'hex' => '#C08A6E'],
+        'or' => ['libelle' => 'Or', 'hex' => '#C9A961'],
+        'bleu_poudre' => ['libelle' => 'Bleu poudré', 'hex' => '#B8C7D4'],
+        'lavande' => ['libelle' => 'Lavande', 'hex' => '#C9BFD6'],
+        'blanc' => ['libelle' => 'Blanc', 'hex' => '#FDFCFA'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Connexion automatique (développement uniquement)
     |--------------------------------------------------------------------------
     |

@@ -58,6 +58,14 @@ Route::get('/creations/{slug}', function (string $slug) {
     ]);
 })->name('creations.show');
 
-// Placeholder : la vraie page arrive avec le formulaire en 3 étapes.
-// Nommée dès maintenant pour que les CTA de la galerie pointent quelque part.
+/*
+|--------------------------------------------------------------------------
+| Conversion
+|--------------------------------------------------------------------------
+*/
+
 Route::view('/demande', 'pages.demande')->name('demande');
+
+// Page de confirmation distincte, et non une modale : c'est le seul repère
+// mesurable proprement dans un outil d'analytique.
+Route::view('/merci', 'pages.merci')->name('merci');
