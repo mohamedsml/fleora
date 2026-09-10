@@ -25,19 +25,18 @@ première installation manuelle du site sur le serveur, voir
 
 ---
 
-## Étape 1 — Créer le sous-domaine
+## Étape 1 — Le domaine
 
-hPanel → **Sites web → Sous-domaines** :
+hPanel → **Sites web → Ajouter un site web** avec le domaine `fleora.ca`.
+Le dossier `~/domains/fleora.ca/` est créé automatiquement.
 
-| Champ | Valeur |
-|---|---|
-| Domaine | `multiweb.ca` |
-| Sous-domaine | `fleora` |
-
-Le dossier `~/domains/fleora.multiweb.ca/` est créé automatiquement.
+> Si vous changez de domaine par la suite, trois endroits sont à mettre à jour :
+> `SITE_URL` dans `.github/workflows/deploy.yml`, le secret GitHub
+> `HOSTINGER_PATH`, et `APP_URL` dans le `.env` du serveur — plus l'entrée cron,
+> dont le chemin change aussi.
 
 Activez ensuite le **SSL** : hPanel → Sécurité → SSL → installer le certificat
-gratuit sur `fleora.multiweb.ca`.
+gratuit sur `fleora.ca`.
 
 ---
 
@@ -58,7 +57,7 @@ Notez les quatre valeurs — elles vont dans le `.env` de l'étape 4.
 ```bash
 ssh -p 65002 uXXXXXX@votre-serveur.hostinger.com
 
-cd ~/domains/fleora.multiweb.ca
+cd ~/domains/fleora.ca
 git clone https://github.com/mohamedsml/fleora.git fleora
 cd fleora
 
@@ -82,7 +81,7 @@ nano .env
 APP_NAME=Fleora
 APP_ENV=production
 APP_DEBUG=false                          # ⚠️ JAMAIS true en production
-APP_URL=https://fleora.multiweb.ca
+APP_URL=https://fleora.ca
 
 APP_TIMEZONE=America/Toronto
 APP_LOCALE=fr
@@ -136,7 +135,7 @@ qui est au-dessus — `.env` (mot de passe de la base), `app/`, `config/`,
 > fonctionnel sur ce compte (Apache suit les liens).
 
 ```bash
-cd ~/domains/fleora.multiweb.ca
+cd ~/domains/fleora.ca
 
 # Le default.php d'Hostinger n'a plus d'utilité — on le met de côté
 mv public_html/default.php ~/default.php.bak 2>/dev/null
@@ -152,8 +151,8 @@ fonctionner normalement.
 **Vérifiez immédiatement après :**
 
 ```bash
-curl -I https://fleora.multiweb.ca/.env      # doit répondre 403 ou 404, JAMAIS 200
-curl -I https://fleora.multiweb.ca           # doit répondre 200
+curl -I https://fleora.ca/.env      # doit répondre 403 ou 404, JAMAIS 200
+curl -I https://fleora.ca           # doit répondre 200
 ```
 
 > Si `.env` répond 200, arrêtez tout : le mot de passe de votre base est
@@ -231,7 +230,7 @@ GitHub → dépôt **fleora** → Settings → Secrets and variables → Actions
 | `HOSTINGER_USER` | `uXXXXXX` | hPanel → Accès SSH |
 | `HOSTINGER_PORT` | `65002` | hPanel → Accès SSH (rarement 22) |
 | `HOSTINGER_SSH_KEY` | contenu de `~/.ssh/fleora_deploy` | clé **privée**, en entier |
-| `HOSTINGER_PATH` | `domains/fleora.multiweb.ca/fleora` | chemin relatif au home |
+| `HOSTINGER_PATH` | `domains/fleora.ca/fleora` | chemin relatif au home |
 
 > Pour `HOSTINGER_SSH_KEY`, copiez le fichier **entier**, y compris
 > `-----BEGIN OPENSSH PRIVATE KEY-----` et la ligne de fin :
@@ -319,14 +318,14 @@ le port (`65002`) et la clé privée copiée en entier.
 
 ```bash
 ssh -p 65002 uXXXXXX@votre-serveur.hostinger.com
-cd ~/domains/fleora.multiweb.ca/fleora
+cd ~/domains/fleora.ca/fleora
 tail -50 storage/logs/laravel.log
 ```
 
 **Revenir au commit précédent :**
 
 ```bash
-cd ~/domains/fleora.multiweb.ca/fleora
+cd ~/domains/fleora.ca/fleora
 git log --oneline -5
 git reset --hard <commit-précédent>
 ./deploy/deploy.sh
@@ -361,7 +360,7 @@ Une seule fois, hPanel → Avancé → **Tâches cron**.
 Commande :
 
 ```
-cd /home/u663068008/domains/fleora.multiweb.ca/fleora && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+cd /home/u663068008/domains/fleora.ca/fleora && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
 Fréquence : `*` dans les cinq champs (chaque minute). Laravel décide ensuite
