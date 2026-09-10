@@ -139,6 +139,40 @@ class DemandeTest extends TestCase
     }
 
     #[Test]
+    public function aucune_occasion_n_est_selectionnee_au_depart(): void
+    {
+        // `occasion_id === null` servait à la fois d'état initial et de choix
+        // « Autre » : le bouton apparaissait coché dès l'ouverture et le champ
+        // de précision s'affichait sans raison.
+        Livewire::test(FormulaireDemande::class)
+            ->assertSet('occasion_id', null)
+            ->assertSet('occasion_autre_choisie', false);
+    }
+
+    #[Test]
+    public function choisir_autre_affiche_le_champ_de_precision(): void
+    {
+        Livewire::test(FormulaireDemande::class)
+            ->call('choisirOccasion', null)
+            ->assertSet('occasion_autre_choisie', true)
+            ->call('choisirOccasion', 1)
+            ->assertSet('occasion_autre_choisie', false);
+    }
+
+    #[Test]
+    public function choisir_une_occasion_efface_la_precision_saisie(): void
+    {
+        // Sinon « Anniversaire » partirait avec un occasion_autre résiduel.
+        $occasion = Occasion::create(['nom_fr' => 'Mariage', 'slug_fr' => 'mariage', 'publie' => true]);
+
+        Livewire::test(FormulaireDemande::class)
+            ->call('choisirOccasion', null)
+            ->set('occasion_autre', 'Départ à la retraite')
+            ->call('choisirOccasion', $occasion->id)
+            ->assertSet('occasion_autre', '');
+    }
+
+    #[Test]
     public function il_refuse_une_date_passee(): void
     {
         Livewire::test(FormulaireDemande::class)

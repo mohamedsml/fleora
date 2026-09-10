@@ -50,6 +50,15 @@ class FormulaireDemande extends Component
     /** Vrai quand la visiteuse coche « je ne sais pas encore ». */
     public bool $type_indecis = false;
 
+    /**
+     * Vrai quand « Autre » est explicitement choisi pour l'occasion.
+     *
+     * Sans ce drapeau, `occasion_id === null` servait à la fois d'état initial
+     * et de choix « Autre » : le bouton apparaissait sélectionné dès
+     * l'ouverture, et le champ de précision s'affichait sans raison.
+     */
+    public bool $occasion_autre_choisie = false;
+
     #[Validate('nullable|string|max:16')]
     public string $quantite = '';
 
@@ -171,6 +180,16 @@ class FormulaireDemande extends Component
     public function precedent(): void
     {
         $this->etape = max(1, $this->etape - 1);
+    }
+
+    public function choisirOccasion(?int $id): void
+    {
+        $this->occasion_id = $id;
+        $this->occasion_autre_choisie = $id === null;
+
+        if ($id !== null) {
+            $this->occasion_autre = '';
+        }
     }
 
     public function basculerCouleur(string $couleur): void

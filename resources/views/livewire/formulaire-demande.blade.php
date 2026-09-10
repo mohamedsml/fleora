@@ -22,7 +22,7 @@
                  style="width: {{ ($etape / 3) * 100 }}%"></div>
         </div>
 
-        <p class="mt-2 text-xs text-ink-400" aria-live="polite">
+        <p class="mt-3 text-xs text-ink-400" aria-live="polite">
             {{ __('demande.etape_sur', ['courante' => $etape, 'total' => 3]) }}
         </p>
     </div>
@@ -38,8 +38,12 @@
     <form wire:submit="envoyer" class="space-y-10">
 
         {{-- Champ leurre : masqué visuellement mais présent dans le DOM.
-             Un humain ne le remplit jamais, un bot remplit tout. --}}
-        <div class="absolute -left-[9999px]" aria-hidden="true">
+             Un humain ne le remplit jamais, un bot remplit tout.
+
+             `sr-only` plutôt qu'un positionnement absolu : `absolute` sans
+             parent en `relative` se cale sur le viewport et recouvre le
+             contenu de la page. --}}
+        <div class="sr-only" aria-hidden="true">
             <label for="site_web">Site web</label>
             <input type="text" id="site_web" wire:model="site_web" tabindex="-1" autocomplete="off">
         </div>
@@ -52,7 +56,7 @@
                 <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     @foreach ($occasions as $o)
                         <button type="button"
-                                wire:click="$set('occasion_id', {{ $o->id }})"
+                                wire:click="choisirOccasion({{ $o->id }})"
                                 @class([
                                     'rounded-xl border px-4 py-3 text-sm transition',
                                     'border-ink-900 bg-ink-900 text-ivory-50' => $occasion_id === $o->id,
@@ -63,20 +67,20 @@
                     @endforeach
 
                     <button type="button"
-                            wire:click="$set('occasion_id', null)"
+                            wire:click="choisirOccasion(null)"
                             @class([
                                 'rounded-xl border px-4 py-3 text-sm transition',
-                                'border-ink-900 bg-ink-900 text-ivory-50' => $occasion_id === null,
-                                'border-sand-200 text-ink-600 hover:border-sand-300 hover:bg-ivory-100' => $occasion_id !== null,
+                                'border-ink-900 bg-ink-900 text-ivory-50' => $occasion_autre_choisie,
+                                'border-sand-200 text-ink-600 hover:border-sand-300 hover:bg-ivory-100' => ! $occasion_autre_choisie,
                             ])>
                         {{ __('demande.autre') }}
                     </button>
                 </div>
 
-                @if ($occasion_id === null)
-                    <input type="text" wire:model="occasion_autre"
+                @if ($occasion_autre_choisie)
+                    <input type="text" wire:model="occasion_autre" autofocus
                            placeholder="{{ __('demande.occasion_autre') }}"
-                           class="mt-3 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                           class="mt-3 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                 @endif
             </fieldset>
 
@@ -86,7 +90,7 @@
                 </label>
                 <input type="date" id="date_evenement" wire:model.live="date_evenement"
                        min="{{ now()->toDateString() }}"
-                       class="mt-4 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                       class="mt-4 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                 <p class="mt-2 text-sm text-ink-400">{{ __('demande.date_aide') }}</p>
 
                 {{-- Alerte douce : mieux vaut annoncer le délai serré tout de
@@ -172,7 +176,7 @@
                 </label>
                 <input type="text" id="texte_a_inscrire" wire:model.live="texte_a_inscrire"
                        maxlength="60" placeholder="{{ __('demande.texte_placeholder') }}"
-                       class="mt-4 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                       class="mt-4 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
 
                 {{-- Aperçu en direct dans la typo du produit : détail à faible
                      coût et fort effet sur l'envie de terminer. --}}
@@ -239,7 +243,7 @@
                             'border-sand-200 hover:bg-ivory-100' => $fleurs !== $valeur,
                         ])>
                             <input type="radio" wire:model="fleurs" value="{{ $valeur }}"
-                                   class="border-sand-300 text-ink-900 focus:ring-sage-400">
+                                   class="border border-sand-300 text-ink-900 focus:ring-sage-400">
                             {{ $libelle }}
                         </label>
                     @endforeach
@@ -311,7 +315,7 @@
                 </label>
                 <textarea id="commentaires" wire:model="commentaires" rows="4"
                           placeholder="{{ __('demande.commentaires_placeholder') }}"
-                          class="mt-4 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400"></textarea>
+                          class="mt-4 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400"></textarea>
             </div>
         @endif
 
@@ -323,14 +327,14 @@
                 <div class="sm:col-span-2">
                     <label for="nom" class="block text-sm text-ink-700">{{ __('demande.nom') }} *</label>
                     <input type="text" id="nom" wire:model.blur="nom" required autocomplete="name"
-                           class="mt-2 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                           class="mt-2 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                     @error('nom')<p class="mt-1.5 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="courriel" class="block text-sm text-ink-700">{{ __('demande.courriel') }} *</label>
                     <input type="email" id="courriel" wire:model.blur="courriel" required autocomplete="email"
-                           class="mt-2 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                           class="mt-2 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                     @error('courriel')<p class="mt-1.5 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
 
@@ -338,7 +342,7 @@
                     <label for="telephone" class="block text-sm text-ink-700">{{ __('demande.telephone') }}</label>
                     <input type="tel" id="telephone" wire:model.blur="telephone" autocomplete="tel"
                            placeholder="(514) 555-1234"
-                           class="mt-2 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                           class="mt-2 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                     @error('telephone')<p class="mt-1.5 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
 
@@ -346,7 +350,7 @@
                     <label for="ville" class="block text-sm text-ink-700">{{ __('demande.ville') }}</label>
                     <input type="text" id="ville" wire:model.blur="ville"
                            placeholder="{{ __('demande.ville_placeholder') }}"
-                           class="mt-2 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                           class="mt-2 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                 </div>
             </div>
 
@@ -371,7 +375,7 @@
                      n'importe quel outil d'analytique. --}}
                 <label for="source" class="block text-sm text-ink-700">{{ __('demande.source') }}</label>
                 <select id="source" wire:model="source"
-                        class="mt-2 w-full rounded-lg border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
+                        class="mt-2 w-full rounded-lg border border-sand-200 bg-ivory-50 px-4 py-3 text-ink-900 focus:border-sage-400 focus:ring-sage-400">
                     <option value="">—</option>
                     @foreach (__('demande.sources') as $valeur => $libelle)
                         <option value="{{ $valeur }}">{{ $libelle }}</option>
@@ -383,7 +387,7 @@
             <div class="space-y-4 border-t border-sand-200 pt-8">
                 <label class="flex items-start gap-3 text-sm text-ink-600">
                     <input type="checkbox" wire:model="consentement" required
-                           class="mt-0.5 rounded border-sand-300 text-ink-900 focus:ring-sage-400">
+                           class="mt-0.5 rounded border border-sand-300 text-ink-900 focus:ring-sage-400">
                     <span>
                         {{ __('demande.consentement') }}
                         <a href="{{ url('/confidentialite') }}" target="_blank" rel="noopener"
@@ -394,7 +398,7 @@
 
                 <label class="flex items-start gap-3 text-sm text-ink-600">
                     <input type="checkbox" wire:model="infolettre"
-                           class="mt-0.5 rounded border-sand-300 text-ink-900 focus:ring-sage-400">
+                           class="mt-0.5 rounded border border-sand-300 text-ink-900 focus:ring-sage-400">
                     <span>{{ __('demande.infolettre') }}</span>
                 </label>
             </div>
