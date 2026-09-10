@@ -7,6 +7,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -18,6 +19,14 @@ class CreationsTable
     {
         return $table
             ->columns([
+                // Vignette : sur un catalogue visuel, reconnaître une création
+                // à sa photo est plus rapide qu'à son titre.
+                ImageColumn::make('apercu')
+                    ->label('')
+                    ->state(fn (Creation $record) => $record->imagePrincipale()?->urlVariante(400))
+                    ->imageHeight(56)
+                    ->extraImgAttributes(['class' => 'rounded-lg object-cover'])
+                    ->defaultImageUrl(null),
                 TextColumn::make('titre_fr')
                     ->label('Création')
                     ->searchable()

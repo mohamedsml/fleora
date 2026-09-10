@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Creations\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -63,6 +64,34 @@ class CreationForm
                             ]),
                     ])
                     ->columnSpanFull(),
+
+                Section::make('Photos')
+                    ->description('La première image est celle qui apparaît dans la galerie. Glissez-déposez pour réordonner.')
+                    ->schema([
+                        FileUpload::make('photos')
+                            ->hiddenLabel()
+                            ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->openable()
+                            ->panelLayout('grid')
+                            ->imagePreviewHeight('180')
+                            // HEIC : format par défaut des iPhone. L'omettre
+                            // reviendrait à refuser la moitié des photos.
+                            ->acceptedFileTypes([
+                                'image/jpeg', 'image/png', 'image/webp',
+                                'image/heic', 'image/heif',
+                            ])
+                            ->maxSize(10 * 1024)
+                            ->maxFiles(12)
+                            // Les fichiers sont conservés en mémoire : c'est
+                            // ImageService qui les écrit, après réencodage et
+                            // génération des variantes WebP.
+                            ->storeFiles(false)
+                            ->helperText('JPG, PNG, WebP ou HEIC — 10 Mo maximum par photo. Les formats optimisés pour le web sont générés automatiquement.')
+                            ->columnSpanFull(),
+                    ]),
 
                 Section::make('Classement')
                     ->schema([
