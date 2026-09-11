@@ -1,72 +1,66 @@
-{{--
-    ⚠️ TEXTE PROVISOIRE — à remplacer par la véritable histoire.
-
-    Ce qui est écrit ici est volontairement générique : personne ne peut
-    inventer votre parcours à votre place, et c'est précisément ce qui fait
-    vendre l'artisanat. Les faits vérifiables (« depuis 2024 », « plus de
-    200 créations ») ont été évités : une affirmation fausse sur une page
-    « À propos » se remarque et coûte plus cher qu'une page sobre.
-
-    À remplacer par : pourquoi vous avez commencé, ce qui vous tient à cœur
-    dans le travail, et ce qui vous distingue concrètement.
---}}
 <x-layout titre="À propos"
-          description="Des boîtes décoratives assemblées à la main au Québec, pensées pour les moments qui comptent.">
+          :description="config('app.name').' crée des compositions florales et des coffrets cadeaux personnalisés pour célébrer les personnes et les moments qui comptent.'">
 
     <div class="mx-auto max-w-3xl px-6 py-20 lg:py-28">
 
         <header>
             <h1 class="font-display text-4xl text-ink-900 sm:text-5xl lg:text-6xl">
-                Le geste avant l'objet
+                À propos de {{ config('app.name') }}
             </h1>
         </header>
 
         {{-- space-y-10 plutôt que 8 : avec un corps de 18 px et une interligne
              à 1.7, 32 px ne séparent pas assez deux paragraphes — le texte
-             paraît compact. Les titres reçoivent une marge supérieure
-             nettement plus grande pour ouvrir visuellement chaque section. --}}
+             paraît compact. --}}
         <div class="mt-14 space-y-10 text-lg leading-relaxed text-ink-600">
 
             <p class="!mb-14 text-xl leading-relaxed text-ink-700">
-                Une boîte n'est jamais qu'une boîte. C'est un prénom qu'on écrit,
-                une couleur qu'on choisit parce qu'elle rappelle quelque chose, un
-                soin qu'on prend pour quelqu'un.
+                Bienvenue chez {{ config('app.name') }} 🌸
             </p>
 
             <p>
-                {{ config('app.name') }} est né d'une conviction simple : les objets
-                qu'on offre méritent autant d'attention que les mots qu'on prononce.
-                Chaque création est assemblée à la main, pièce par pièce, dans notre
-                atelier au Québec.
+                {{ config('app.name') }} est née d'une envie simple : transformer l'art
+                d'offrir en une expérience unique et mémorable.
             </p>
 
             <p>
-                Nous ne produisons pas en série. Chaque commande part d'une
-                conversation — votre événement, vos couleurs, le prénom à inscrire —
-                et devient une pièce qui n'existera qu'une fois.
-            </p>
-
-            <h2 class="!mt-20 font-display text-3xl text-ink-900">Comment nous travaillons</h2>
-
-            <p>
-                Nous choisissons des matières qui durent : fleurs éternelles
-                soigneusement sélectionnées, boîtes rigides, finitions posées à la
-                main. Une création doit pouvoir rester en place longtemps après
-                l'événement.
+                Nous créons des compositions florales et des coffrets cadeaux
+                personnalisés, pensés avec soin pour célébrer les personnes et les
+                moments qui comptent.
             </p>
 
             <p>
-                Quand une idée nous semble irréalisable dans le délai ou le budget
-                annoncé, nous le disons franchement plutôt que de livrer quelque
-                chose d'approximatif.
+                Chaque création est imaginée avec une attention particulière portée
+                aux détails : les fleurs, les couleurs, les petites attentions,
+                l'emballage et surtout le message que vous souhaitez transmettre.
             </p>
-
-            <h2 class="!mt-20 font-display text-3xl text-ink-900">Où nous trouver</h2>
 
             <p>
-                Nous livrons dans tout le Grand Montréal — Montréal, Laval, la
-                Rive-Nord et la Rive-Sud. La cueillette est possible sur rendez-vous.
+                Chez {{ config('app.name') }}, nous croyons qu'un cadeau n'a pas besoin
+                d'être grand pour être inoubliable. Il doit simplement être choisi
+                avec intention.
             </p>
+
+            <p>
+                Que ce soit pour un anniversaire, une naissance, une célébration, une
+                déclaration d'amour, un remerciement ou simplement pour faire plaisir
+                sans raison particulière, nous sommes là pour donner vie à votre idée.
+            </p>
+
+            {{-- La signature de marque : mise en valeur plutôt que noyée dans le
+                 flux, c'est la phrase que le visiteur doit retenir. --}}
+            <p class="!mt-16 border-l-2 border-blush-300 pl-6 font-display text-2xl leading-snug text-ink-900">
+                Votre intention. Votre message. Notre création. 🌷
+            </p>
+
+            <div class="!mt-16 border-t border-sand-200 pt-10 text-center">
+                <p class="font-display text-2xl text-ink-900">
+                    {{ config('app.name') }} — Floral Gifts &amp; Boxes
+                </p>
+                <p class="mt-2 text-ink-500">
+                    Offrir autrement. Créer des souvenirs.
+                </p>
+            </div>
         </div>
 
         <div class="mt-20 rounded-3xl bg-ivory-100 px-8 py-12 text-center">
