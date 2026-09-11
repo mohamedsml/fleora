@@ -3,8 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\CreationsLesPlusConsultees;
-use App\Filament\Widgets\PagesLesPlusVues;
-use App\Filament\Widgets\SourcesDeTrafic;
+use App\Filament\Widgets\DemandesEnCours;
 use App\Filament\Widgets\StatistiquesVisites;
 use App\Models\User;
 use Filament\Http\Middleware\Authenticate;
@@ -139,11 +138,13 @@ class AdminPanelProvider extends PanelProvider
                     ->authorize(fn () => (bool) auth()->user()?->actif),
             ])
             ->widgets([
-                // Statistiques de visite : les chiffres à voir en ouvrant
-                // l'administration, avant toute autre chose.
+                // Le tableau de bord répond à « qu'est-ce que je dois faire
+                // aujourd'hui » : les demandes d'abord, puis une synthèse de
+                // fréquentation. Le détail des visites — pages d'entrée,
+                // sources, parcours — vit sur la page Rapport de visites, où
+                // il peut être filtré par période.
+                DemandesEnCours::class,
                 StatistiquesVisites::class,
-                PagesLesPlusVues::class,
-                SourcesDeTrafic::class,
                 CreationsLesPlusConsultees::class,
                 AccountWidget::class,
             ])

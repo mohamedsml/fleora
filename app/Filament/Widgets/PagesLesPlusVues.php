@@ -16,6 +16,20 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class PagesLesPlusVues extends TableWidget
 {
+    /**
+     * Retiré du tableau de bord.
+     *
+     * Son contenu vit sur la page « Rapport de visites », où il se filtre par
+     * période. Le garder ici doublonnerait, et allongerait un écran qui doit
+     * répondre d'abord à « qu'est-ce que je dois faire aujourd'hui ».
+     *
+     * La classe reste enregistrable à la main si besoin.
+     */
+    public static function isDiscovered(): bool
+    {
+        return false;
+    }
+
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 1;
