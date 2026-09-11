@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnTetesSecurite;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // préfixe de langue. Sans cela, la galerie et le formulaire
         // repasseraient en français à chaque interaction sur une page anglaise.
         $middleware->appendToGroup('web', SetLocale::class);
+
+        // En-têtes de sécurité sur toutes les réponses HTTP, y compris les
+        // pages d'erreur et l'administration.
+        $middleware->append(EnTetesSecurite::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

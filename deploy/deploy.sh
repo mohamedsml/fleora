@@ -119,6 +119,18 @@ if grep -qiE '^FLEORA_AUTO_LOGIN=(true|1)' .env; then
     fatal "FLEORA_AUTO_LOGIN est activé : l'administration serait accessible sans mot de passe. Retirer cette ligne du .env du serveur."
 fi
 
+# Cookie de session en clair : interceptable sur une connexion HTTP. Le site
+# étant servi en HTTPS, il n'y a aucune raison de ne pas l'exiger.
+if ! grep -qiE '^SESSION_SECURE_COOKIE=(true|1)' .env; then
+    fatal "SESSION_SECURE_COOKIE doit valoir true en production : sans cela, le cookie de session circule en clair."
+fi
+
+# Turnstile : absence signalée sans bloquer. Le formulaire reste protégé par le
+# honeypot, le délai minimal et la limite par IP — mais un bot déterminé passe.
+if ! grep -qE '^TURNSTILE_SECRET_KEY=.+' .env; then
+    log "⚠ Turnstile non configuré : le formulaire n'a pas de captcha."
+fi
+
 # ── Sauvegarde de la base avant migration ────────────────────────────────
 # Une migration qui échoue à mi-chemin laisse le schéma dans un état
 # intermédiaire. Le dump permet de revenir en arrière.

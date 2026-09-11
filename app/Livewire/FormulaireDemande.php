@@ -17,6 +17,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile as TurnstileRule;
 
 /**
  * Demande de soumission — la conversion du site.
@@ -88,7 +89,7 @@ class FormulaireDemande extends Component
     #[Validate('required|string|max:120')]
     public string $nom = '';
 
-    #[Validate('required|email:rfc,dns|max:180')]
+    #[Validate('required|email:rfc|max:180')]
     public string $courriel = '';
 
     #[Validate('nullable|string|max:32')]
@@ -114,6 +115,14 @@ class FormulaireDemande extends Component
 
     /** Horodatage d'ouverture : un envoi en moins de 3 s vient d'un bot. */
     public int $ouvert_a = 0;
+
+    /**
+     * Jeton Cloudflare Turnstile, rempli par le widget.
+     *
+     * Reste vide tant que les clés ne sont pas configurées : le formulaire
+     * fonctionne alors sans captcha, protégé par les trois autres mesures.
+     */
+    public string $turnstile = '';
 
     /** Référence de la création cliquée dans la galerie, s'il y en a une. */
     public ?Creation $creationReference = null;
@@ -164,9 +173,21 @@ class FormulaireDemande extends Component
             ],
             3 => [
                 'nom' => ['required', 'string', 'max:120'],
+                // email:rfc SANS la vérification DNS, malgré ce que l'attribut
+                // déclare. Une résolution DNS lente ou bloquée — cas courant
+                // sur un hébergement mutualisé — rejetterait des adresses
+                // parfaitement valides et ferait perdre la demande.
+                // Le gain contre le spam est marginal : Turnstile et le
+                // honeypot écartent déjà les envois automatisés.
                 'courriel' => ['required', 'email:rfc', 'max:180'],
                 'telephone' => ['nullable', 'string', 'max:32'],
                 'consentement' => ['accepted'],
+                // Turnstile n'est exigé que si les clés sont configurées :
+                // sans elles, le widget ne s'affiche pas et bloquer l'envoi
+                // rendrait le formulaire inutilisable.
+                'turnstile' => static::turnstileActif()
+                    ? ['required', new TurnstileRule]
+                    : ['nullable'],
             ],
             default => [],
         };
@@ -285,6 +306,18 @@ class FormulaireDemande extends Component
      * Deux signaux, aucun ne demandant d'effort à la visiteuse : le champ
      * leurre et le temps de remplissage.
      */
+    /**
+     * Turnstile est-il configuré ?
+     *
+     * Statique : la règle de validation est construite avant l'instanciation
+     * complète du composant.
+     */
+    public static function turnstileActif(): bool
+    {
+        return filled(config('services.turnstile.key'))
+            && filled(config('services.turnstile.secret'));
+    }
+
     private function estUnBot(): bool
     {
         if ($this->site_web !== '') {

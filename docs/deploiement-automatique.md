@@ -360,6 +360,53 @@ php artisan up
 
 ---
 
+## Sécurité — à faire une fois
+
+### Cloudflare Turnstile
+
+Protection anti-robots du formulaire. Gratuite, sans limite, et **sans témoin
+déposé** — donc aucune bannière de consentement à ajouter.
+
+1. Créer un compte sur [dash.cloudflare.com](https://dash.cloudflare.com)
+   (gratuit, aucune carte demandée)
+2. **Turnstile → Add site** : nom `Fleora`, domaine `fleora.ca`, widget
+   **Managed**
+3. Copier les deux clés dans le `.env` du serveur :
+
+```dotenv
+TURNSTILE_SITE_KEY=0x4AAA...
+TURNSTILE_SECRET_KEY=0x4AAA...
+```
+
+4. `php artisan config:clear`
+
+> Sans ces clés, le widget ne s'affiche pas et le formulaire reste utilisable —
+> protégé par le champ leurre, le délai minimal et la limite de 3 envois par
+> heure et par IP. Le déploiement le signale sans bloquer.
+
+### Cookie de session
+
+Obligatoire dans le `.env` de production :
+
+```dotenv
+SESSION_SECURE_COOKIE=true
+SESSION_SAME_SITE=lax
+```
+
+> `deploy.sh` refuse de déployer sans : un cookie de session transmis en clair
+> peut être intercepté sur une connexion HTTP.
+
+### Vérification
+
+```bash
+curl -I https://fleora.ca | grep -iE "x-frame|x-content-type|strict-transport"
+```
+
+Puis [securityheaders.com](https://securityheaders.com) — la note doit être
+**A ou mieux**.
+
+---
+
 ## Cron du planificateur
 
 Une seule fois, hPanel → Avancé → **Tâches cron**.

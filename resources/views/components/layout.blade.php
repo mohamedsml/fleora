@@ -118,5 +118,12 @@
 
     {{-- En fin de body : le DOM doit exister avant qu'Alpine ne s'y branche. --}}
     @livewireScripts
+
+    {{-- Script Turnstile, chargé uniquement si les clés sont configurées : une
+         requête vers Cloudflare sur chaque page serait du poids inutile tant
+         que le captcha n'est pas actif. --}}
+    @if (\App\Livewire\FormulaireDemande::turnstileActif())
+        <x-turnstile.scripts />
+    @endif
 </body>
 </html>

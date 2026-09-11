@@ -35,4 +35,28 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudflare Turnstile
+    |--------------------------------------------------------------------------
+    |
+    | Protection anti-robots du formulaire de demande. Gratuite et sans limite.
+    |
+    | Retenue plutôt que reCAPTCHA parce qu'elle ne dépose AUCUN témoin : pas
+    | de bannière de consentement à ajouter, ce qui préserve l'objectif Loi 25.
+    | reCAPTCHA a valu des sanctions à plusieurs entreprises pour usage sans
+    | consentement, et collecte au-delà de la finalité de sécurité.
+    |
+    | Clés à créer sur https://dash.cloudflare.com → Turnstile. Sans elles, le
+    | widget ne s'affiche pas et la validation est ignorée : le formulaire
+    | continue de fonctionner, protégé par le honeypot, le délai minimal et la
+    | limite par IP.
+    |
+    */
+
+    'turnstile' => [
+        'key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

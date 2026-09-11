@@ -402,6 +402,24 @@
                     <span>{{ __('demande.infolettre') }}</span>
                 </label>
             </div>
+
+            {{-- Cloudflare Turnstile.
+
+                 Invisible dans la plupart des cas : le visiteur ne voit rien,
+                 aucune case à cocher, aucune image à identifier. Aucun témoin
+                 déposé, donc aucune bannière de consentement à ajouter.
+
+                 Le composant du paquet pose lui-même `wire:ignore` (sinon
+                 Livewire détruirait le widget à chaque re-rendu) et gère
+                 l'expiration du jeton, valable cinq minutes. --}}
+            @if (\App\Livewire\FormulaireDemande::turnstileActif())
+                <div>
+                    <x-turnstile wire:model="turnstile" id="demande_captcha" />
+                    @error('turnstile')
+                        <p class="mt-2 text-sm text-error-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
         @endif
 
         {{-- ── Navigation ──────────────────────────────────────────────── --}}
