@@ -1,0 +1,43 @@
+name: Exporter le contenu de production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  exporter:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Produire l'archive
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -e
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            rm -rf storage/app/exports
+            /opt/alt/php83/usr/bin/php artisan fleora:exporter-contenu
+            ls -lh storage/app/exports/
+
+      - name: Récupérer l'archive
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          source: "${{ secrets.HOSTINGER_PATH }}/storage/app/exports/*.zip"
+          target: "archive"
+          strip_components: 10
+
+      - name: Publier en artéfact
+        uses: actions/upload-artifact@v4
+        with:
+          name: contenu-production
+          path: archive/**/*.zip
+          retention-days: 1
