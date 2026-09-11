@@ -9,7 +9,7 @@ jobs:
     environment:
       name: Hostinger Fleora
     steps:
-      - name: Vérifier le dossier cible
+      - name: Renseigner les réglages de session
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -17,19 +17,31 @@ jobs:
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
+            set -e
             cd "$HOME/domains/fleora.ca/fleora"
-            echo "--- origine git ---"
-            git remote get-url origin 2>&1
-            echo "--- commit actuel ---"
-            git log --oneline -1 2>&1
-            echo "--- branche ---"
-            git rev-parse --abbrev-ref HEAD 2>&1
-            echo "--- fichiers clés ---"
-            for f in artisan deploy/deploy.sh .env public/index.php; do
-              [ -e "$f" ] && echo "présent : $f" || echo "ABSENT  : $f"
-            done
-            echo "--- .env : garde-fous du script ---"
-            grep -qiE '^SESSION_SECURE_COOKIE=(true|1)' .env && echo "SESSION_SECURE_COOKIE=true : OK" || echo "SESSION_SECURE_COOKIE : MANQUANT (deploy.sh refusera)"
-            grep -qE '^TURNSTILE_SECRET_KEY=.+' .env && echo "TURNSTILE_SECRET_KEY : renseigné" || echo "TURNSTILE_SECRET_KEY : absent (avertissement seulement)"
-            echo "--- symlink public_html ---"
-            ls -ld "$HOME/domains/fleora.ca/public_html" 2>&1
+
+            echo "--- lignes SESSION_ actuelles ---"
+            grep -n '^SESSION_' .env || echo "(aucune)"
+
+            # Sauvegarde horodatée avant toute écriture dans le .env.
+            cp .env ".env.sauvegarde-$(date +%Y%m%d-%H%M%S)"
+
+            # Le site est servi en HTTPS : le cookie de session ne doit jamais
+            # circuler en clair. deploy.sh refuse de déployer sans ce réglage.
+            if grep -qE '^SESSION_SECURE_COOKIE=' .env; then
+              sed -i 's/^SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=true/' .env
+              echo "SESSION_SECURE_COOKIE : valeur corrigée"
+            else
+              printf '\nSESSION_SECURE_COOKIE=true\n' >> .env
+              echo "SESSION_SECURE_COOKIE : ajouté"
+            fi
+
+            if grep -qE '^SESSION_SAME_SITE=' .env; then
+              echo "SESSION_SAME_SITE : déjà présent"
+            else
+              printf 'SESSION_SAME_SITE=lax\n' >> .env
+              echo "SESSION_SAME_SITE : ajouté"
+            fi
+
+            echo "--- résultat ---"
+            grep -n '^SESSION_' .env
