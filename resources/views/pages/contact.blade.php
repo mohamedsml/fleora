@@ -14,6 +14,14 @@
 <x-layout :titre="__('pages.contact.meta_titre')"
           :description="__('pages.contact.meta_description')">
 
+    <x-slot:schema>
+        <x-schema :donnees="\App\Support\DonneesStructurees::entreprise()" />
+        <x-schema :donnees="\App\Support\DonneesStructurees::filAriane([
+            __('commun.nav.accueil') => route_langue('accueil'),
+            __('pages.contact.meta_titre') => route_langue('contact'),
+        ])" />
+    </x-slot:schema>
+
     <div class="mx-auto max-w-5xl px-6 py-20 lg:py-28">
 
         <header class="max-w-2xl">

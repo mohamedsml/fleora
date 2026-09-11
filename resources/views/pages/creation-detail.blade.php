@@ -4,45 +4,25 @@
     $prix = $creation->fourchettePrix();
     $principale = $creation->imagePrincipale();
 
-    // Construit hors du template : Blade ne parse pas correctement des
-    // tableaux imbriqués passés directement à @json.
-    $donneesStructurees = [
-        '@context' => 'https://schema.org',
-        '@type' => 'Product',
-        'name' => $titre,
-        'description' => $description,
-        'image' => $creation->media->map(fn ($m) => $m->urlVariante(1200))->values()->all(),
-        'brand' => ['@type' => 'Brand', 'name' => config('app.name')],
-    ];
-
-    if ($creation->prix_min) {
-        $offre = [
-            '@type' => 'AggregateOffer',
-            'priceCurrency' => 'CAD',
-            'lowPrice' => $creation->prix_min / 100,
-            // MadeToOrder plutôt que InStock : chaque pièce est fabriquée
-            // à la commande, annoncer du stock serait faux.
-            'availability' => 'https://schema.org/MadeToOrder',
-        ];
-
-        if ($creation->prix_max) {
-            $offre['highPrice'] = $creation->prix_max / 100;
-        }
-
-        $donneesStructurees['offers'] = $offre;
-    }
 @endphp
 
-<x-layout :titre="$titre" :description="$description">
+<x-layout :titre="$titre" :description="$description" :modele="$creation">
 
-    {{-- Données structurées : permet à Google d'afficher la fourchette de prix
-         et l'image dans les résultats. Product convient même sans vente en
-         ligne — la page présente bien un produit identifiable. --}}
-    @if ($principale)
-        <script type="application/ld+json">
-            {!! json_encode($donneesStructurees, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-        </script>
-    @endif
+    {{-- Product convient même sans vente en ligne : la page présente bien un
+         produit identifiable, et Google affiche alors la fourchette de prix. --}}
+    {{-- Balisage présent même sans photo : une fiche sans image reste un
+         produit identifiable, et l'absence d'image n'est pas une raison de
+         renoncer au prix affiché dans les résultats de recherche. --}}
+    <x-slot:schema>
+        <x-schema :donnees="\App\Support\DonneesStructurees::creation($creation)" />
+        <x-schema :donnees="\App\Support\DonneesStructurees::filAriane([
+            __('commun.nav.accueil') => route_langue('accueil'),
+            __('commun.nav.creations') => route_langue('creations'),
+            $titre => route_langue('creations.show', $creation->slugPour()),
+        ])" />
+    </x-slot:schema>
+
+
 
     <div class="mx-auto max-w-7xl px-6 py-12 lg:py-20">
 

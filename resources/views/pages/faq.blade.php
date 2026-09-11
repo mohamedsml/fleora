@@ -6,30 +6,21 @@
     // anglaises.
     $groupes = $faqs->groupBy(fn ($faq) => $faq->t('categorie') ?? '');
 
-    // schema.org FAQPage : permet à Google d'afficher les questions en accordéon
-    // directement dans les résultats de recherche.
-    $donneesStructurees = [
-        '@context' => 'https://schema.org',
-        '@type' => 'FAQPage',
-        'mainEntity' => $faqs->map(fn ($faq) => [
-            '@type' => 'Question',
-            'name' => $faq->t('question'),
-            'acceptedAnswer' => [
-                '@type' => 'Answer',
-                'text' => $faq->t('reponse'),
-            ],
-        ])->values()->all(),
-    ];
 @endphp
 
 <x-layout :titre="__('pages.faq.meta_titre')"
           :description="__('pages.faq.meta_description')">
 
-    @if ($faqs->isNotEmpty())
-        <script type="application/ld+json">
-            {!! json_encode($donneesStructurees, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-        </script>
-    @endif
+    <x-slot:schema>
+        @if ($faqs->isNotEmpty())
+            {{-- Google affiche les questions en accordéon dans ses résultats. --}}
+            <x-schema :donnees="\App\Support\DonneesStructurees::faq($faqs)" />
+        @endif
+        <x-schema :donnees="\App\Support\DonneesStructurees::filAriane([
+            __('commun.nav.accueil') => route_langue('accueil'),
+            __('pages.faq.meta_titre') => route_langue('faq'),
+        ])" />
+    </x-slot:schema>
 
     <div class="mx-auto max-w-3xl px-6 py-20 lg:py-28">
 

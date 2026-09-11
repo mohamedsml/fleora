@@ -12,7 +12,17 @@
     le visiteur passe par l'accueil.
 --}}
 <x-layout :titre="$occasion->t('meta_title') ?: $nom"
-          :description="$occasion->t('meta_description') ?: $intro">
+          :description="$occasion->t('meta_description') ?: $intro"
+          :modele="$occasion">
+
+    <x-slot:schema>
+        <x-schema :donnees="\App\Support\DonneesStructurees::occasion($occasion, $creations)" />
+        <x-schema :donnees="\App\Support\DonneesStructurees::filAriane([
+            __('commun.nav.accueil') => route_langue('accueil'),
+            __('commun.nav.occasions') => route_langue('occasions'),
+            $nom => route_langue('occasions.show', $occasion->slugPour()),
+        ])" />
+    </x-slot:schema>
 
     <div class="mx-auto max-w-7xl px-6 py-16 lg:py-24">
 

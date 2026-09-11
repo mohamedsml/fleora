@@ -57,3 +57,6 @@ Thumbs.db
 
 # Empreinte du dernier composer install (deploy.sh)
 /.composer-lock-hash
+
+# Généré à chaque déploiement par fleora:sitemap
+/public/sitemap.xml

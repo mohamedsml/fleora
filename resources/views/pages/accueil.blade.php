@@ -8,6 +8,15 @@
     :titre="__('accueil.meta.titre')"
     :description="__('accueil.meta.description', ['region' => $region])">
 
+    {{-- Store : le signal SEO local le plus direct. Alimente le panneau de
+         connaissances et la zone desservie dans les résultats de recherche. --}}
+    <x-slot:schema>
+        <x-schema :donnees="\App\Support\DonneesStructurees::entreprise()" />
+        @if ($faqs->isNotEmpty())
+            <x-schema :donnees="\App\Support\DonneesStructurees::faq($faqs)" />
+        @endif
+    </x-slot:schema>
+
     {{-- ─── Héros ──────────────────────────────────────────────────────
          Une promesse claire, une preuve de localisation, un seul appel à
          l'action dominant. Pas de carrousel : il disperse l'attention et

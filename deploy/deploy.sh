@@ -221,6 +221,10 @@ fi
 # ── Caches ───────────────────────────────────────────────────────────────
 # optimize:clear d'abord : un cache de config obsolète pointerait sur les
 # anciennes valeurs du .env.
+# Sitemap : regénéré à chaque déploiement, le contenu ayant pu changer.
+log "Génération du sitemap…"
+$PHP artisan fleora:sitemap --no-interaction || log "Sitemap non généré — le déploiement continue."
+
 log "Reconstruction des caches…"
 $PHP artisan optimize:clear --no-interaction
 $PHP artisan optimize --no-interaction

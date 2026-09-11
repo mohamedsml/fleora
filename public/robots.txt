@@ -1,2 +1,12 @@
+# Fleora — https://fleora.ca
+
 User-agent: *
-Disallow:
+Allow: /
+
+# Administration et confirmation : rien à indexer.
+Disallow: /admin
+Disallow: /merci
+Disallow: /en/thank-you
+
+# Le sitemap déclare les deux langues et leurs correspondances.
+Sitemap: https://fleora.ca/sitemap.xml
