@@ -10,6 +10,7 @@ jobs:
       name: Hostinger Fleora
     steps:
       - name: Produire l'archive
+        id: export
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -22,7 +23,11 @@ jobs:
             cd "${{ secrets.HOSTINGER_PATH }}"
             rm -rf storage/app/exports
             /opt/alt/php83/usr/bin/php artisan fleora:exporter-contenu
-            ls -lh storage/app/exports/
+            # Nom fixe : le glob de scp-action ne résout pas un chemin relatif,
+            # et un horodatage obligerait à faire transiter le nom entre deux
+            # étapes.
+            mv "$(ls -t storage/app/exports/*.zip | head -1)" "$HOME/contenu-production.zip"
+            ls -lh "$HOME/contenu-production.zip"
 
       - name: Récupérer l'archive
         uses: appleboy/scp-action@v0.1.7
@@ -31,13 +36,28 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          source: "${{ secrets.HOSTINGER_PATH }}/storage/app/exports/*.zip"
+          source: "contenu-production.zip"
           target: "archive"
-          strip_components: 10
+
+      - name: Vérifier
+        run: ls -lhR archive/
 
       - name: Publier en artéfact
         uses: actions/upload-artifact@v4
         with:
           name: contenu-production
           path: archive/**/*.zip
-          retention-days: 1
+          retention-days: 2
+
+      - name: Nettoyer le serveur
+        if: always()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            rm -f "$HOME/contenu-production.zip"
+            rm -rf "${{ secrets.HOSTINGER_PATH }}/storage/app/exports"
+            echo "archive retirée du serveur"
