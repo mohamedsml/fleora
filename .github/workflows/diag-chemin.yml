@@ -9,20 +9,27 @@ jobs:
     environment:
       name: Hostinger Fleora
     steps:
-      - name: Inspecter l'arborescence
+      - name: Tester HOSTINGER_PATH sans le révéler
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          envs: CHEMIN
           script: |
-            echo "HOME = $HOME"
-            echo "--- contenu du home ---"
-            ls -la "$HOME" | head -30
-            echo "--- domains/ ---"
-            ls -la "$HOME/domains" 2>/dev/null | head -20
-            echo "--- recherche d'un artisan (projet Laravel) ---"
-            find "$HOME" -maxdepth 5 -name artisan -not -path '*/vendor/*' 2>/dev/null | head -10
-            echo "--- public_html ---"
-            ls -ld "$HOME/public_html" 2>/dev/null
+            # La valeur passe par une variable d'environnement : elle n'est
+            # jamais interpolée dans le script, donc jamais imprimée.
+            echo "longueur du chemin : ${#CHEMIN}"
+            echo "commence par un / : $(case "$CHEMIN" in /*) echo oui;; *) echo non;; esac)"
+            echo "finit par un espace ou retour : $(case "$CHEMIN" in *' '|*$'\r'|*$'\n') echo OUI-PROBLEME;; *) echo non;; esac)"
+            echo "octets non imprimables : $(printf '%s' "$CHEMIN" | tr -d '[:print:]' | wc -c)"
+            if [ -d "$CHEMIN" ]; then
+              echo "RESULTAT : le dossier existe"
+            else
+              echo "RESULTAT : dossier introuvable"
+              echo "attendu   : domains/fleora.ca/fleora"
+              echo "existe-t-il ? $([ -d "$HOME/domains/fleora.ca/fleora" ] && echo oui || echo non)"
+            fi
+        env:
+          CHEMIN: ${{ secrets.HOSTINGER_PATH }}
