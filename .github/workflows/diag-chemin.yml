@@ -1,0 +1,28 @@
+name: Diagnostic chemin Hostinger
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Inspecter l'arborescence
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "HOME = $HOME"
+            echo "--- contenu du home ---"
+            ls -la "$HOME" | head -30
+            echo "--- domains/ ---"
+            ls -la "$HOME/domains" 2>/dev/null | head -20
+            echo "--- recherche d'un artisan (projet Laravel) ---"
+            find "$HOME" -maxdepth 5 -name artisan -not -path '*/vendor/*' 2>/dev/null | head -10
+            echo "--- public_html ---"
+            ls -ld "$HOME/public_html" 2>/dev/null
