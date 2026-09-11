@@ -50,8 +50,8 @@ class ContenuBilingueTest extends TestCase
         // la chaîne attendue, ce qui ne correspond plus au HTML dès qu'il y a
         // un accent ou une apostrophe typographique.
         $attendus = [
-            '/' => 'Des boîtes décorées',
-            '/en' => 'Decorated boxes',
+            '/' => 'Des créations uniques',
+            '/en' => 'Unique creations',
             '/contact' => 'Parlons de votre projet',
             '/en/contact' => 'Let us talk about your project',
             '/a-propos' => 'Bienvenue chez',

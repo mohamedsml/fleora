@@ -5,8 +5,8 @@
     shower. Lui donner sa porte d'entrée réduit le rebond bien plus qu'un
     catalogue générique.
 
-    Les pages de détail par occasion (/occasions/mariage…) arriveront ensuite :
-    ce sont elles qui portent le référencement à forte intention.
+    Chaque carte mène à la page de l'occasion (/occasions/mariage…) : ce sont
+    elles qui portent le référencement à forte intention d'achat.
 --}}
 <x-layout :titre="__('pages.occasions.meta_titre')"
           :description="__('pages.occasions.meta_description')">
@@ -29,9 +29,11 @@
         @else
             <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($occasions as $occasion)
-                    {{-- Vers la galerie pré-filtrée : le lien est utile tout de
-                         suite, avant même que les pages de détail existent. --}}
-                    <a href="{{ route_langue('creations', ['occasion' => $occasion->slugPour()]) }}"
+                    {{-- Vers la page de l'occasion, pas vers la galerie filtrée :
+                         ces pages portent le contenu SEO à forte intention
+                         (« boîte baby shower personnalisée Montréal ») et
+                         n'étaient atteignables que depuis l'accueil. --}}
+                    <a href="{{ route_langue('occasions.show', $occasion->slugPour()) }}"
                        class="group block">
                         <div class="relative aspect-square overflow-hidden rounded-2xl bg-ivory-200">
                             @php $image = $occasion->media->first(); @endphp

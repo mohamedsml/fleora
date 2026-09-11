@@ -247,8 +247,20 @@ class ParcoursMetierTest extends TestCase
         $unique = Creation::create(['titre_fr' => 'Coffret', 'slug_fr' => 'coffret', 'prix_min' => 4500]);
         $sansPrix = Creation::create(['titre_fr' => 'Sur mesure', 'slug_fr' => 'sur-mesure']);
 
-        $this->assertStringContainsString('–', $fourchette->fourchettePrix('fr'));
-        $this->assertStringStartsWith('À partir de', $unique->fourchettePrix('fr'));
+        // Toujours un prix de départ, jamais une fourchette : chaque création
+        // est personnalisée, donc le prix final dépend de la demande. Le haut
+        // d'une fourchette décourage avant même la conversation.
+        // L'espace avant le « $ » est insécable (U+00A0) : c'est le formateur
+        // de devise qui la pose, et une espace ordinaire ne correspondrait pas.
+        $attendu = "À partir de 45\u{a0}$";
+        $this->assertSame($attendu, $fourchette->fourchettePrix('fr'));
+        $this->assertSame($attendu, $unique->fourchettePrix('fr'));
+
+        // Sans décimales : « 45 $ » se lit mieux que « 45,00 $ » sur une
+        // vitrine, où le prix est indicatif.
+        $this->assertStringNotContainsString(',00', $fourchette->fourchettePrix('fr'));
+        $this->assertSame('From $45', $unique->fourchettePrix('en'));
+
         $this->assertNull($sansPrix->fourchettePrix('fr'));
     }
 

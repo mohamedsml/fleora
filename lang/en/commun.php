@@ -24,7 +24,8 @@ return [
     ],
 
     'cta' => [
-        'soumission' => 'Request a quote',
+        // Nom de marque : conservé tel quel en anglais, comme une signature.
+        'soumission' => 'Créer ma Fleora',
         'creations' => 'View our creations',
         'contact' => 'Write to us',
     ],
@@ -45,7 +46,8 @@ return [
     'pied' => [
         'navigation' => 'Navigation',
         'joindre' => 'Get in touch',
-        'slogan' => 'Personalised decorative boxes, assembled by hand for the moments that matter.',
+        'slogan' => 'Unique creations, thoughtfully imagined for the moments that matter.',
+        'description' => 'Floral creations & personalised gifts',
         'confidentialite' => 'Privacy policy',
         'droits' => 'All rights reserved.',
         'region' => 'Greater Montreal, Laval and the North Shore',

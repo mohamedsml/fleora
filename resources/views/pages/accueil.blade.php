@@ -227,15 +227,17 @@
     <section class="py-24 lg:py-32" data-reveal>
         <div class="mx-auto max-w-3xl px-6 text-center lg:px-8">
             <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">
-                Parlons de votre projet
+                {{ __('accueil.appel.titre') }}
             </h2>
             <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-600">
-                Décrivez-nous votre événement : nous vous répondons sous 24 heures,
-                sans engagement de votre part.
+                {{ __('accueil.appel.texte') }}
             </p>
-            <div class="mt-10">
+            <div class="mt-10 flex flex-wrap justify-center gap-4">
                 <x-ui.bouton href="{{ route_langue('demande') }}">
-                    Demander une soumission
+                    {{ __('commun.cta.soumission') }}
+                </x-ui.bouton>
+                <x-ui.bouton href="{{ route_langue('creations') }}" variante="secondaire">
+                    {{ __('commun.cta.creations') }}
                 </x-ui.bouton>
             </div>
         </div>

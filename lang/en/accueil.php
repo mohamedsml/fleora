@@ -2,33 +2,40 @@
 
 return [
     'meta' => [
-        'titre' => 'Personalised decorative boxes',
-        'description' => 'Handmade flower boxes and personalised gift sets for weddings, baby showers, baptisms and birthdays. :region.',
+        'titre' => 'Floral creations & personalised gifts',
+        'description' => 'Floral creations and personalised gifts, thoughtfully imagined for weddings, baby showers, baptisms and birthdays. :region.',
     ],
 
     'hero' => [
-        'titre_1' => 'Decorated boxes',
-        'titre_2' => 'for the moments that matter',
-        'intro' => 'Every piece is composed by hand: your colours, your theme, the name of the person who matters. Fresh or artificial flowers, whichever suits your event best.',
+        'titre_1' => 'Unique creations',
+        'titre_2' => 'for your precious moments',
+        'intro' => 'Flowers, colours, the message to inscribe, the presentation: every creation is imagined with care, made for the person it is meant for.',
         'reassurance' => 'Reply within 24 hours · No obligation',
+        // Nom de marque : la signature reste en français, comme une devise.
+        'signature' => 'Votre intention. Votre message. Notre création.',
     ],
 
     'occasions' => [
-        'titre' => 'For every occasion',
-        'intro' => 'A wedding, a birth, a graduation — every moment deserves its own creation.',
+        'titre' => 'Every moment deserves care',
+        'intro' => 'A wedding, a birth, a graduation — discover the creations made for each occasion.',
     ],
 
     'creations' => [
         'titre' => 'Our creations',
-        'intro' => 'A glimpse of what is possible. Everything can be personalised.',
+        'intro' => 'Every creation is imagined with care and made to be unique. Browse our work for inspiration.',
         'lien' => 'View the full gallery →',
     ],
 
     'etapes' => [
         'titre' => 'How it works',
-        1 => ['titre' => 'You describe your project', 'texte' => 'Occasion, colours, the name to inscribe, the date. The form takes two minutes.'],
-        2 => ['titre' => 'We propose a creation', 'texte' => 'A detailed quote within 24 hours, with the options available and the price.'],
-        3 => ['titre' => 'You approve before delivery', 'texte' => 'We send you a photo of your creation before handover. No surprises.'],
+        1 => ['titre' => 'Tell us about your occasion', 'texte' => 'Occasion, date, colours, the message to inscribe. The form takes a few minutes.'],
+        2 => ['titre' => 'Imagine your creation', 'texte' => 'We propose a personalised creation within 24 hours, with the options and the price.'],
+        3 => ['titre' => 'We create your gift', 'texte' => 'We send you a photo before handover. No surprises.'],
+    ],
+
+    'appel' => [
+        'titre' => 'Have something in mind?',
+        'texte' => 'Tell us about your occasion, your ideas and the small details that matter. We reply within 24 hours with a personalised proposal.',
     ],
 
     'temoignages' => ['titre' => 'What they say'],

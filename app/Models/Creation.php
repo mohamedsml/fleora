@@ -63,8 +63,18 @@ class Creation extends Model
     }
 
     /**
-     * Fourchette de prix formatée, ex. « À partir de 45,00 $ » ou « 45,00 $ – 90,00 $ ».
-     * Retourne null si aucun prix n'est saisi — mieux vaut ne rien afficher.
+     * Prix de départ formaté, ex. « À partir de 70 $ ».
+     *
+     * Toujours un prix de départ, jamais une fourchette : chaque création est
+     * personnalisée, donc le prix final dépend de la demande. Annoncer
+     * « 70 $ – 150 $ » laisserait croire à un catalogue figé, et le haut de
+     * la fourchette décourage avant même la conversation.
+     *
+     * `prix_max` reste en base : il sert aux données structurées
+     * (`lowPrice`/`highPrice`), que Google attend sous forme d'intervalle.
+     *
+     * Retourne null si aucun prix n'est saisi — mieux vaut ne rien afficher
+     * qu'un prix inventé.
      */
     public function fourchettePrix(?string $langue = null): ?string
     {
@@ -72,13 +82,11 @@ class Creation extends Model
             return null;
         }
 
-        $min = $this->argent($this->prix_min, $langue);
+        // Sans décimales : sur une vitrine, « 70 $ » se lit mieux que
+        // « 70,00 $ », et les centimes n'ont pas de sens sur un prix indicatif.
+        $min = $this->argent($this->prix_min, $langue, decimales: false);
 
-        if ($this->prix_max === null || $this->prix_max <= $this->prix_min) {
-            return __('fleora.prix.a_partir_de', ['montant' => $min], $langue);
-        }
-
-        return "{$min} – {$this->argent($this->prix_max, $langue)}";
+        return __('fleora.prix.a_partir_de', ['montant' => $min], $langue);
     }
 
     #[Scope]

@@ -13,9 +13,9 @@
 return [
     'occasions' => [
         'meta_titre' => 'Occasions',
-        'meta_description' => 'Mariages, baby showers, anniversaires, baptêmes, graduations : des créations pensées pour chaque événement.',
+        'meta_description' => 'Mariages, baby showers, anniversaires, baptêmes, graduations : des créations florales et cadeaux personnalisés pensés pour chaque événement.',
         'titre' => 'Pour chaque occasion',
-        'intro' => 'Chaque événement a son langage. Choisissez le vôtre pour voir les créations qui lui correspondent.',
+        'intro' => 'Chaque moment mérite une attention qui lui ressemble. Découvrez nos créations florales et cadeaux personnalisés, imaginés pour célébrer les moments qui comptent.',
         'vide' => 'Les occasions seront bientôt disponibles.',
         'cta_titre' => 'Votre occasion n’est pas dans la liste ?',
         'cta_texte' => 'Racontez-nous votre projet — nous créons sur mesure pour tous les moments qui comptent.',
@@ -31,7 +31,7 @@ return [
 
     'contact' => [
         'meta_titre' => 'Contact',
-        'meta_description' => 'Écrivez-nous pour votre projet de boîte personnalisée. Réponse sous 24 h. Livraison dans le Grand Montréal, Laval et la Rive-Nord.',
+        'meta_description' => 'Écrivez-nous pour votre projet de création personnalisée. Réponse sous 24 h. Livraison dans le Grand Montréal, Laval et la Rive-Nord.',
         'titre' => 'Parlons de votre projet',
         'intro' => 'Une question, une idée encore floue, une date qui approche ? Écrivez-nous — nous répondons à chaque message sous :delai heures.',
         'projet_titre' => 'Pour un projet précis',

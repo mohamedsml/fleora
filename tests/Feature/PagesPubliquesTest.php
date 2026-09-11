@@ -113,14 +113,16 @@ class PagesPubliquesTest extends TestCase
     }
 
     #[Test]
-    public function le_hub_occasions_pointe_vers_la_galerie_filtree(): void
+    public function le_hub_occasions_pointe_vers_les_pages_d_occasion(): void
     {
-        // Le lien est utile tout de suite, avant même que les pages de détail
-        // par occasion existent.
+        // Ces pages portent le contenu SEO à forte intention d'achat
+        // (« boîte baby shower personnalisée Montréal »). Tant que le hub
+        // renvoyait vers la galerie filtrée, elles n'étaient atteignables que
+        // depuis l'accueil.
         Occasion::create(['nom_fr' => 'Mariage', 'slug_fr' => 'mariage', 'publie' => true]);
 
         $this->get('/occasions')
-            ->assertSee(route('creations', ['occasion' => 'mariage']), false);
+            ->assertSee(route('occasions.show', 'mariage'), false);
     }
 
     #[Test]

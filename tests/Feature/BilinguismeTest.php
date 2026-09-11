@@ -204,8 +204,10 @@ class BilinguismeTest extends TestCase
     #[Test]
     public function les_libelles_de_navigation_sont_traduits(): void
     {
-        $this->get('/')->assertSee('Créations')->assertSee('Demander une soumission');
-        $this->get('/en')->assertSee('Creations')->assertSee('Request a quote');
+        // « Créer ma Fleora » est le CTA principal dans les deux langues : un
+        // nom de marque ne se traduit pas.
+        $this->get('/')->assertSee('Créations')->assertSee('Créer ma Fleora');
+        $this->get('/en')->assertSee('Creations')->assertSee('Créer ma Fleora');
     }
 
     #[Test]

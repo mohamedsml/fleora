@@ -13,7 +13,7 @@
 return [
     'occasions' => [
         'meta_titre' => 'Occasions',
-        'meta_description' => 'Weddings, baby showers, birthdays, baptisms, graduations: creations made for every occasion.',
+        'meta_description' => 'Weddings, baby showers, birthdays, baptisms, graduations: floral creations and personalised gifts made for every occasion.',
         'titre' => 'For every occasion',
         'intro' => 'Every event has its own language. Choose yours to see the creations that match it.',
         'vide' => 'Occasions will be available shortly.',
@@ -31,7 +31,7 @@ return [
 
     'contact' => [
         'meta_titre' => 'Contact',
-        'meta_description' => 'Write to us about your personalised box project. Reply within 24 hours. Delivery across Greater Montreal, Laval and the North Shore.',
+        'meta_description' => 'Write to us about your personalised creation. Reply within 24 hours. Delivery across Greater Montreal, Laval and the North Shore.',
         'titre' => 'Let us talk about your project',
         'intro' => 'A question, an idea still taking shape, a date coming up? Write to us — we answer every message within :delai hours.',
         'projet_titre' => 'For a specific project',

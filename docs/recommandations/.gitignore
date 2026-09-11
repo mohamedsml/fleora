@@ -1,0 +1,5 @@
+# Documents de travail déposés ici (PDF, captures, notes reçues).
+# Ils ne sont pas versionnés : ce sont des pièces de travail, pas du code.
+*
+!.gitignore
+!README.md

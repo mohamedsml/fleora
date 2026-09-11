@@ -24,8 +24,16 @@ return [
         'fermer_menu' => 'Fermer le menu',
     ],
 
+    /*
+     * « Créer ma Fleora » est le CTA principal du site.
+     *
+     * Il remplace « Demander une soumission », qui décrivait une démarche
+     * administrative là où la cliente vient chercher une création. La clé
+     * garde son nom `soumission` : la renommer casserait les sept vues qui
+     * l'appellent, sans rien apporter.
+     */
     'cta' => [
-        'soumission' => 'Demander une soumission',
+        'soumission' => 'Créer ma Fleora',
         'creations' => 'Voir les créations',
         'contact' => 'Nous écrire',
     ],
@@ -46,7 +54,11 @@ return [
     'pied' => [
         'navigation' => 'Navigation',
         'joindre' => 'Nous joindre',
-        'slogan' => 'Boîtes décoratives personnalisées, décorées à la main pour vos plus beaux moments.',
+        // Positionnement unifié : l'offre est « fleurs + cadeaux +
+        // personnalisation », pas seulement des boîtes. Trois vocabulaires
+        // coexistaient auparavant sur le site.
+        'slogan' => 'Des créations uniques, imaginées avec soin pour vos moments précieux.',
+        'description' => 'Créations florales & cadeaux personnalisés',
         'confidentialite' => 'Politique de confidentialité',
         'droits' => 'Tous droits réservés.',
         'region' => 'Grand Montréal, Laval et Rive-Nord',
