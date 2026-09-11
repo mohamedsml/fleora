@@ -54,8 +54,13 @@ class SetLocale
         // Le français occupe la racine : il n'apparaît jamais dans l'URL.
         $prefixes = array_slice($locales, 1);
 
+        // La langue par défaut vient de `app.locales[0]`, PAS de
+        // `config('app.locale')` : cette dernière reflète la locale COURANTE,
+        // que setLocale() a pu modifier. Une requête française arrivant après
+        // une requête anglaise resterait alors en anglais — visible en test,
+        // et réel dès que deux requêtes partagent un processus.
         return in_array($premier, $prefixes, true)
             ? $premier
-            : config('app.locale');
+            : $locales[0];
     }
 }

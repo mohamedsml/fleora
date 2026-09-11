@@ -21,7 +21,7 @@
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
-            Toutes les occasions
+            {{ __('pages.occasion.retour') }}
         </a>
 
         <header class="mt-10 max-w-2xl">
@@ -43,13 +43,13 @@
                 <div class="mt-14 text-center">
                     <a href="{{ route_langue('creations', ['occasion' => $occasion->slugPour()]) }}"
                        class="rounded-full border border-sand-300 px-8 py-3 text-sm text-ink-700 transition hover:border-ink-900 hover:bg-ivory-100">
-                        Voir les {{ $total }} créations
+                        {{ __('pages.occasion.voir_toutes', ['total' => $total]) }}
                     </a>
                 </div>
             @endif
         @else
             <p class="mt-16 text-ink-400">
-                Les créations pour cette occasion arrivent bientôt.
+                {{ __('pages.occasion.vide') }}
             </p>
         @endif
 
@@ -62,14 +62,13 @@
         @endif
 
         <div class="mt-24 rounded-3xl bg-ivory-100 px-8 py-12 text-center">
-            <h2 class="font-display text-3xl text-ink-900">Une création pour votre {{ mb_strtolower($nom) }}</h2>
+            <h2 class="font-display text-3xl text-ink-900">{{ __('pages.occasion.cta_titre', ['occasion' => mb_strtolower($nom)]) }}</h2>
             <p class="mx-auto mt-4 max-w-lg text-ink-600">
-                Dites-nous vos couleurs, le prénom à inscrire et votre date —
-                nous vous répondons sous 24 h.
+                {{ __('pages.occasion.cta_texte') }}
             </p>
             <div class="mt-8">
                 <x-ui.bouton :href="route_langue('demande', ['occasion' => $occasion->slugPour()])">
-                    Demander une soumission
+                    {{ __('commun.cta.soumission') }}
                 </x-ui.bouton>
             </div>
         </div>

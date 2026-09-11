@@ -130,7 +130,7 @@ class PagesPubliquesTest extends TestCase
         Faq::create([
             'question_fr' => 'Livrez-vous à Laval ?',
             'reponse_fr' => 'Oui.',
-            'categorie' => 'Livraison',
+            'categorie_fr' => 'Livraison',
             'publie' => true,
         ]);
 

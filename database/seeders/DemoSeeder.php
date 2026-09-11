@@ -119,7 +119,7 @@ class DemoSeeder extends Seeder
                 ['question_fr' => $f['q']],
                 [
                     'reponse_fr' => $f['r'],
-                    'categorie' => $f['cat'],
+                    'categorie_fr' => $f['cat'],
                     'sur_accueil' => $f['accueil'],
                     'ordre' => $i * 10,
                     'publie' => true,

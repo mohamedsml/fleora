@@ -28,20 +28,19 @@
 
         <div class="mt-12 rounded-3xl border border-sand-200 bg-ivory-100 px-8 py-10">
             <p class="text-ink-600">
-                Cette page est en cours de préparation. En attendant, nos créations
-                sont déjà visibles — et nous répondons à toute question par courriel.
+                {{ __('commun.preparation.texte') }}
             </p>
 
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <x-ui.bouton :href="route_langue('creations')">Voir les créations</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('creations')">{{ __('commun.cta.creations') }}</x-ui.bouton>
                 <x-ui.bouton :href="route_langue('demande')" variante="secondaire">
-                    Demander une soumission
+                    {{ __('commun.cta.soumission') }}
                 </x-ui.bouton>
             </div>
         </div>
 
         <p class="mt-10 text-sm text-ink-400">
-            Une question ?
+            {{ __('commun.preparation.question') }}
             <a href="mailto:{{ config('fleora.contact.courriel') }}"
                class="text-ink-700 underline underline-offset-4 hover:text-terracotta-600">
                 {{ config('fleora.contact.courriel') }}

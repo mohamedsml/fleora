@@ -8,24 +8,23 @@
     Les pages de détail par occasion (/occasions/mariage…) arriveront ensuite :
     ce sont elles qui portent le référencement à forte intention.
 --}}
-<x-layout titre="Occasions"
-          description="Mariages, baby showers, anniversaires, baptêmes, graduations : des créations pensées pour chaque événement.">
+<x-layout :titre="__('pages.occasions.meta_titre')"
+          :description="__('pages.occasions.meta_description')">
 
     <div class="mx-auto max-w-7xl px-6 py-20 lg:py-28">
 
         <header class="max-w-2xl">
             <h1 class="font-display text-4xl text-ink-900 sm:text-5xl lg:text-6xl">
-                Pour chaque occasion
+                {{ __('pages.occasions.titre') }}
             </h1>
             <p class="mt-6 text-lg leading-relaxed text-ink-600">
-                Chaque événement a son langage. Choisissez le vôtre pour voir les
-                créations qui lui correspondent.
+                {{ __('pages.occasions.intro') }}
             </p>
         </header>
 
         @if ($occasions->isEmpty())
             <p class="mt-16 text-ink-400">
-                Les occasions seront bientôt disponibles.
+                {{ __('pages.occasions.vide') }}
             </p>
         @else
             <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -69,13 +68,12 @@
         @endif
 
         <div class="mt-24 rounded-3xl bg-ivory-100 px-8 py-12 text-center">
-            <h2 class="font-display text-3xl text-ink-900">Votre occasion n'est pas dans la liste ?</h2>
+            <h2 class="font-display text-3xl text-ink-900">{{ __('pages.occasions.cta_titre') }}</h2>
             <p class="mx-auto mt-4 max-w-lg text-ink-600">
-                Racontez-nous votre projet — nous créons sur mesure pour tous les
-                moments qui comptent.
+                {{ __('pages.occasions.cta_texte') }}
             </p>
             <div class="mt-8">
-                <x-ui.bouton :href="route_langue('demande')">Demander une soumission</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('demande')">{{ __('commun.cta.soumission') }}</x-ui.bouton>
             </div>
         </div>
     </div>

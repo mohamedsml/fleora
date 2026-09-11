@@ -5,8 +5,8 @@
 @endphp
 
 <x-layout
-    titre="Boîtes décoratives personnalisées"
-    description="Boîtes à fleurs et coffrets personnalisés, décorés à la main pour mariages, baby showers, baptêmes et anniversaires. {{ $region }}.">
+    :titre="__('accueil.meta.titre')"
+    :description="__('accueil.meta.description', ['region' => $region])">
 
     {{-- ─── Héros ──────────────────────────────────────────────────────
          Une promesse claire, une preuve de localisation, un seul appel à
@@ -21,27 +21,25 @@
                     </p>
 
                     <h1 class="mt-6 font-display text-5xl leading-[1.05] text-ink-900 sm:text-6xl lg:text-7xl">
-                        Des boîtes décorées<br>
-                        <em class="not-italic text-blush-600">pour vos plus beaux moments</em>
+                        {{ __('accueil.hero.titre_1') }}<br>
+                        <em class="not-italic text-blush-600">{{ __('accueil.hero.titre_2') }}</em>
                     </h1>
 
                     <p class="mt-7 max-w-lg text-lg leading-relaxed text-ink-600">
-                        Chaque création est composée à la main : vos couleurs, votre thème,
-                        le prénom de la personne qui compte. Fleurs naturelles ou artificielles,
-                        selon ce qui met le mieux votre événement en valeur.
+                        {{ __('accueil.hero.intro') }}
                     </p>
 
                     <div class="mt-10 flex flex-wrap gap-4">
                         <x-ui.bouton href="{{ route_langue('demande') }}">
-                            Demander une soumission
+                            {{ __('commun.cta.soumission') }}
                         </x-ui.bouton>
                         <x-ui.bouton href="{{ route_langue('creations') }}" variante="secondaire">
-                            Voir les créations
+                            {{ __('commun.cta.creations') }}
                         </x-ui.bouton>
                     </div>
 
                     <p class="mt-6 text-sm text-ink-400">
-                        Réponse sous 24 h · Sans engagement
+                        {{ __('accueil.hero.reassurance') }}
                     </p>
                 </div>
 
@@ -87,9 +85,9 @@
         <section class="border-y border-ink-800/5 bg-ivory-100 py-20 lg:py-24" data-reveal>
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="max-w-2xl">
-                    <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">Pour chaque occasion</h2>
+                    <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">{{ __('accueil.occasions.titre') }}</h2>
                     <p class="mt-4 text-ink-600">
-                        Un mariage, une naissance, un diplôme — chaque moment mérite sa création.
+                        {{ __('accueil.occasions.intro') }}
                     </p>
                 </div>
 
@@ -113,13 +111,13 @@
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="flex flex-wrap items-end justify-between gap-6">
                     <div class="max-w-2xl">
-                        <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">Nos créations</h2>
+                        <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">{{ __('accueil.creations.titre') }}</h2>
                         <p class="mt-4 text-ink-600">
-                            Un aperçu de ce qui est possible. Tout se personnalise.
+                            {{ __('accueil.creations.intro') }}
                         </p>
                     </div>
                     <a href="{{ route_langue('creations') }}" class="text-sm text-blush-600 underline-offset-4 hover:underline">
-                        Voir toute la galerie →
+                        {{ __('accueil.creations.lien') }}
                     </a>
                 </div>
 
@@ -138,19 +136,19 @@
     <section class="border-y border-ink-800/5 bg-ivory-100 py-20 lg:py-24" data-reveal>
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="max-w-2xl">
-                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">Comment ça fonctionne</h2>
+                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">{{ __('accueil.etapes.titre') }}</h2>
             </div>
 
             <ol class="mt-14 grid gap-10 md:grid-cols-3">
-                @foreach ([
-                    ['Vous décrivez votre projet', 'Occasion, couleurs, prénom à inscrire, date. Le formulaire prend deux minutes.'],
-                    ['Nous vous proposons une création', 'Une soumission détaillée sous 24 h, avec les options possibles et le prix.'],
-                    ['Vous validez avant la livraison', 'Une photo de votre création vous est envoyée avant la remise. Aucune surprise.'],
-                ] as $index => [$titre, $texte])
+                @foreach ([1, 2, 3] as $numero)
                     <li>
-                        <span class="font-display text-5xl text-blush-300">0{{ $index + 1 }}</span>
-                        <h3 class="mt-4 font-display text-2xl text-ink-900">{{ $titre }}</h3>
-                        <p class="mt-3 leading-relaxed text-ink-600">{{ $texte }}</p>
+                        <span class="font-display text-5xl text-blush-300">0{{ $numero }}</span>
+                        <h3 class="mt-4 font-display text-2xl text-ink-900">
+                            {{ __("accueil.etapes.{$numero}.titre") }}
+                        </h3>
+                        <p class="mt-3 leading-relaxed text-ink-600">
+                            {{ __("accueil.etapes.{$numero}.texte") }}
+                        </p>
                     </li>
                 @endforeach
             </ol>
@@ -161,7 +159,7 @@
     @if ($temoignages->isNotEmpty())
         <section class="py-20 lg:py-28" data-reveal>
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">Ce qu'elles en disent</h2>
+                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">{{ __('accueil.temoignages.titre') }}</h2>
 
                 <div class="mt-14 grid gap-8 md:grid-cols-3">
                     @foreach ($temoignages as $temoignage)
@@ -196,7 +194,7 @@
     @if ($faqs->isNotEmpty())
         <section class="border-t border-ink-800/5 bg-ivory-100 py-20 lg:py-24" data-reveal>
             <div class="mx-auto max-w-3xl px-6 lg:px-8">
-                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">Questions fréquentes</h2>
+                <h2 class="font-display text-4xl text-ink-900 lg:text-5xl">{{ __('accueil.faq.titre') }}</h2>
 
                 <div class="mt-12 divide-y divide-ink-800/10">
                     @foreach ($faqs as $faq)

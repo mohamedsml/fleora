@@ -1,7 +1,10 @@
 @php
     // Groupées par catégorie : une liste de quinze questions à plat se parcourt
     // mal, alors qu'on cherche presque toujours dans un thème précis.
-    $groupes = $faqs->groupBy('categorie');
+    // Groupement sur la catégorie TRADUITE : `groupBy('categorie_fr')`
+    // afficherait « Commander » et « Livraison » au milieu de questions
+    // anglaises.
+    $groupes = $faqs->groupBy(fn ($faq) => $faq->t('categorie') ?? '');
 
     // schema.org FAQPage : permet à Google d'afficher les questions en accordéon
     // directement dans les résultats de recherche.
@@ -19,8 +22,8 @@
     ];
 @endphp
 
-<x-layout titre="Questions fréquentes"
-          description="Délais, livraison, personnalisation, budget : les réponses aux questions qu'on nous pose le plus souvent.">
+<x-layout :titre="__('pages.faq.meta_titre')"
+          :description="__('pages.faq.meta_description')">
 
     @if ($faqs->isNotEmpty())
         <script type="application/ld+json">
@@ -32,16 +35,15 @@
 
         <header class="max-w-2xl">
             <h1 class="font-display text-4xl text-ink-900 sm:text-5xl lg:text-6xl">
-                Questions fréquentes
+                {{ __('pages.faq.titre') }}
             </h1>
             <p class="mt-6 text-lg leading-relaxed text-ink-600">
-                Si votre question n'y figure pas, écrivez-nous — nous répondons à
-                chacune.
+                {{ __('pages.faq.intro') }}
             </p>
         </header>
 
         @if ($faqs->isEmpty())
-            <p class="mt-16 text-ink-400">Les questions fréquentes arrivent bientôt.</p>
+            <p class="mt-16 text-ink-400">{{ __('pages.faq.vide') }}</p>
         @else
             <div class="mt-16 space-y-14">
                 @foreach ($groupes as $categorie => $questions)
@@ -76,14 +78,13 @@
         @endif
 
         <div class="mt-20 rounded-3xl bg-ivory-100 px-8 py-12 text-center">
-            <h2 class="font-display text-2xl text-ink-900">Votre question n'y est pas ?</h2>
+            <h2 class="font-display text-2xl text-ink-900">{{ __('pages.faq.cta_titre') }}</h2>
             <p class="mx-auto mt-3 max-w-lg text-ink-600">
-                Écrivez-nous, ou décrivez directement votre projet — c'est souvent
-                le plus rapide.
+                {{ __('pages.faq.cta_texte') }}
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <x-ui.bouton :href="route_langue('demande')">Demander une soumission</x-ui.bouton>
-                <x-ui.bouton :href="route_langue('contact')" variante="secondaire">Nous écrire</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('demande')">{{ __('commun.cta.soumission') }}</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('contact')" variante="secondaire">{{ __('commun.cta.contact') }}</x-ui.bouton>
             </div>
         </div>
     </div>
