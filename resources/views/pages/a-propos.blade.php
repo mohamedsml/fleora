@@ -21,9 +21,13 @@
             </h1>
         </header>
 
-        <div class="mt-12 space-y-8 text-lg leading-relaxed text-ink-600">
+        {{-- space-y-10 plutôt que 8 : avec un corps de 18 px et une interligne
+             à 1.7, 32 px ne séparent pas assez deux paragraphes — le texte
+             paraît compact. Les titres reçoivent une marge supérieure
+             nettement plus grande pour ouvrir visuellement chaque section. --}}
+        <div class="mt-14 space-y-10 text-lg leading-relaxed text-ink-600">
 
-            <p class="text-xl text-ink-700">
+            <p class="!mb-14 text-xl leading-relaxed text-ink-700">
                 Une boîte n'est jamais qu'une boîte. C'est un prénom qu'on écrit,
                 une couleur qu'on choisit parce qu'elle rappelle quelque chose, un
                 soin qu'on prend pour quelqu'un.
@@ -42,7 +46,7 @@
                 et devient une pièce qui n'existera qu'une fois.
             </p>
 
-            <h2 class="pt-6 font-display text-3xl text-ink-900">Comment nous travaillons</h2>
+            <h2 class="!mt-20 font-display text-3xl text-ink-900">Comment nous travaillons</h2>
 
             <p>
                 Nous choisissons des matières qui durent : fleurs éternelles
@@ -57,7 +61,7 @@
                 chose d'approximatif.
             </p>
 
-            <h2 class="pt-6 font-display text-3xl text-ink-900">Où nous trouver</h2>
+            <h2 class="!mt-20 font-display text-3xl text-ink-900">Où nous trouver</h2>
 
             <p>
                 Nous livrons dans tout le Grand Montréal — Montréal, Laval, la
