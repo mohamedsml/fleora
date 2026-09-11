@@ -9,14 +9,14 @@
 @php
     $image = $creation->imagePrincipale();
     $prix = $creation->fourchettePrix();
-    $lien = route('creations.show', $creation->slug_fr);
+    $lien = route_langue('creations.show', $creation->slugPour());
 
     // Toutes les photos de la création, pour la navigation dans la lightbox.
     $photos = $creation->media->map(fn ($m) => [
         'image' => $m->urlVariante(1200),
         'titre' => $creation->t('titre'),
         'soustitre' => $creation->occasions->map(fn ($o) => $o->t('nom'))->join(' · '),
-        'lien' => route('demande', ['creation' => $creation->slug_fr]),
+        'lien' => route_langue('demande', ['creation' => $creation->slugPour()]),
     ])->values();
 
     // Les 3 premières images portent le LCP : pas de lazy-loading dessus.

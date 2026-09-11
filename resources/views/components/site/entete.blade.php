@@ -1,13 +1,13 @@
 @php
-    // route() plutôt qu'url() dès qu'une route nommée existe : le lien suit
-    // automatiquement si l'URL change. Les autres pages ne sont pas encore
-    // construites, d'où le url() provisoire.
+    // route_langue() plutôt que route() : sur une page anglaise, route() nu
+    // renverrait vers les URL françaises — la navigation ferait sortir de la
+    // version anglaise à chaque clic.
     $liens = [
-        ['url' => route('accueil'), 'libelle' => 'Accueil'],
-        ['url' => route('creations'), 'libelle' => 'Créations'],
-        ['url' => route('occasions'), 'libelle' => 'Occasions'],
-        ['url' => route('a-propos'), 'libelle' => 'À propos'],
-        ['url' => route('contact'), 'libelle' => 'Contact'],
+        ['url' => route_langue('accueil'), 'libelle' => __('commun.nav.accueil')],
+        ['url' => route_langue('creations'), 'libelle' => __('commun.nav.creations')],
+        ['url' => route_langue('occasions'), 'libelle' => __('commun.nav.occasions')],
+        ['url' => route_langue('a-propos'), 'libelle' => __('commun.nav.a_propos')],
+        ['url' => route_langue('contact'), 'libelle' => __('commun.nav.contact')],
     ];
 @endphp
 
@@ -23,14 +23,14 @@
              le dessin n'occupe que ~62 % de la hauteur du viewBox. À h-16 le
              logo lui-même mesure ~40 px. Le décalage négatif rattrape la marge
              gauche du fichier pour aligner le logo sur la grille de la page. --}}
-        <a href="{{ route('accueil') }}" aria-label="{{ config('app.name') }} — accueil" class="-ml-3">
+        <a href="{{ route_langue('accueil') }}" aria-label="{{ __('commun.accessibilite.accueil', ['marque' => config('app.name')]) }}" class="-ml-3">
             <img src="{{ asset('images/logo-fleora.svg') }}"
                  alt="{{ config('app.name') }}"
                  width="640" height="180"
                  class="h-16 w-auto">
         </a>
 
-        <nav class="hidden items-center gap-9 lg:flex" aria-label="Navigation principale">
+        <nav class="hidden items-center gap-9 lg:flex" aria-label="{{ __('commun.nav.principale') }}">
             @foreach ($liens as $lien)
                 <a href="{{ $lien['url'] }}"
                    @class([
@@ -43,9 +43,11 @@
                 </a>
             @endforeach
 
-            <x-ui.bouton href="{{ route('demande') }}" class="!px-6 !py-2.5">
-                Demander une soumission
+            <x-ui.bouton href="{{ route_langue('demande') }}" class="!px-6 !py-2.5">
+                {{ __('commun.cta.soumission') }}
             </x-ui.bouton>
+
+            <x-site.selecteur-langue class="ml-2" />
         </nav>
 
         <button type="button"
@@ -53,7 +55,7 @@
                 :aria-expanded="ouvert ? 'true' : 'false'"
                 aria-controls="menu-mobile"
                 class="-mr-2 p-2 text-ink-800 lg:hidden">
-            <span class="sr-only">Ouvrir le menu</span>
+            <span class="sr-only">{{ __('commun.nav.ouvrir_menu') }}</span>
             {{-- Deux tracés superposés : le second reste masqué tant qu'Alpine
                  n'a pas démarré, sinon les deux icônes se chevauchent. --}}
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -64,16 +66,20 @@
     </div>
 
     <div id="menu-mobile" x-show="ouvert" x-cloak x-collapse class="border-t border-ink-800/5 lg:hidden">
-        <nav class="space-y-1 px-6 py-5" aria-label="Navigation mobile">
+        <nav class="space-y-1 px-6 py-5" aria-label="{{ __('commun.nav.mobile') }}">
             @foreach ($liens as $lien)
                 <a href="{{ $lien['url'] }}" class="block py-2.5 text-ink-700 hover:text-blush-600">
                     {{ $lien['libelle'] }}
                 </a>
             @endforeach
 
-            <x-ui.bouton href="{{ route('demande') }}" class="mt-4 w-full">
-                Demander une soumission
+            <x-ui.bouton href="{{ route_langue('demande') }}" class="mt-4 w-full">
+                {{ __('commun.cta.soumission') }}
             </x-ui.bouton>
+
+            {{-- Le sélecteur doit rester atteignable sur mobile : c'est
+                 souvent là qu'on découvre le site depuis un lien partagé. --}}
+            <x-site.selecteur-langue class="mt-5 justify-center border-t border-sand-200 pt-5" />
         </nav>
     </div>
 </header>

@@ -82,8 +82,8 @@
                 le plus rapide.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <x-ui.bouton :href="route('demande')">Demander une soumission</x-ui.bouton>
-                <x-ui.bouton :href="route('contact')" variante="secondaire">Nous écrire</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('demande')">Demander une soumission</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('contact')" variante="secondaire">Nous écrire</x-ui.bouton>
             </div>
         </div>
     </div>

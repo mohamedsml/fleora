@@ -123,9 +123,11 @@ class FormulaireDemande extends Component
         $this->ouvert_a = now()->timestamp;
 
         if ($creation) {
+            // parSlug : le lien « je veux quelque chose comme ça » porte le
+            // slug de la langue depuis laquelle on a cliqué.
             $this->creationReference = Creation::publie()
                 ->with('occasions')
-                ->where('slug_fr', $creation)
+                ->parSlug($creation)
                 ->first();
 
             // Pré-remplissage contextuel : une friction supprimée gratuitement.

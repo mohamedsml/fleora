@@ -39,7 +39,7 @@
                         qu'une question de plus.
                     </p>
                     <div class="mt-7">
-                        <x-ui.bouton :href="route('demande')">
+                        <x-ui.bouton :href="route_langue('demande')">
                             Demander une soumission
                         </x-ui.bouton>
                     </div>
@@ -114,7 +114,7 @@
                 chacune peut être adaptée à vos couleurs.
             </p>
             <div class="mt-8">
-                <x-ui.bouton :href="route('creations')" variante="secondaire">
+                <x-ui.bouton :href="route_langue('creations')" variante="secondaire">
                     Voir les créations
                 </x-ui.bouton>
             </div>

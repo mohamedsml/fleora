@@ -15,12 +15,15 @@ if (! function_exists('route_langue')) {
      * continuent donc de fonctionner sans modification, et le préfixe suit
      * automatiquement la locale courante.
      */
-    function route_langue(string $nom, array $params = [], ?string $langue = null): string
+    function route_langue(string $nom, mixed $params = [], ?string $langue = null): string
     {
         $langue = $langue ?? app()->getLocale();
 
         $nomComplet = app(Traductions::class)->nomRoute($nom, $langue);
 
+        // `mixed` plutôt que `array` : route() accepte aussi un scalaire pour
+        // un paramètre unique (`route('creations.show', $slug)`), et l'usage
+        // est répandu dans les vues.
         return route(Route::has($nomComplet) ? $nomComplet : $nom, $params);
     }
 }

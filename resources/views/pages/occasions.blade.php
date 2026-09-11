@@ -32,7 +32,7 @@
                 @foreach ($occasions as $occasion)
                     {{-- Vers la galerie pré-filtrée : le lien est utile tout de
                          suite, avant même que les pages de détail existent. --}}
-                    <a href="{{ route('creations', ['occasion' => $occasion->slug_fr]) }}"
+                    <a href="{{ route_langue('creations', ['occasion' => $occasion->slugPour()]) }}"
                        class="group block">
                         <div class="relative aspect-square overflow-hidden rounded-2xl bg-ivory-200">
                             @php $image = $occasion->media->first(); @endphp
@@ -75,7 +75,7 @@
                 moments qui comptent.
             </p>
             <div class="mt-8">
-                <x-ui.bouton :href="route('demande')">Demander une soumission</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('demande')">Demander une soumission</x-ui.bouton>
             </div>
         </div>
     </div>

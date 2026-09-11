@@ -16,7 +16,7 @@
 
     <div class="mx-auto max-w-7xl px-6 py-16 lg:py-24">
 
-        <a href="{{ route('occasions') }}"
+        <a href="{{ route_langue('occasions') }}"
            class="inline-flex items-center gap-2 text-sm text-ink-400 transition hover:text-ink-700">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -41,7 +41,7 @@
 
             @if ($total > $creations->count())
                 <div class="mt-14 text-center">
-                    <a href="{{ route('creations', ['occasion' => $occasion->slug_fr]) }}"
+                    <a href="{{ route_langue('creations', ['occasion' => $occasion->slugPour()]) }}"
                        class="rounded-full border border-sand-300 px-8 py-3 text-sm text-ink-700 transition hover:border-ink-900 hover:bg-ivory-100">
                         Voir les {{ $total }} créations
                     </a>
@@ -68,7 +68,7 @@
                 nous vous répondons sous 24 h.
             </p>
             <div class="mt-8">
-                <x-ui.bouton :href="route('demande', ['occasion' => $occasion->slug_fr])">
+                <x-ui.bouton :href="route_langue('demande', ['occasion' => $occasion->slugPour()])">
                     Demander une soumission
                 </x-ui.bouton>
             </div>

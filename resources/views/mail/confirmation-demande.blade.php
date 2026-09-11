@@ -47,7 +47,7 @@
 </x-mail::panel>
 @endif
 
-<x-mail::button :url="route('creations')">
+<x-mail::button :url="route_langue('creations')">
 {{ __('courriels.confirmation.cta') }}
 </x-mail::button>
 

@@ -69,13 +69,16 @@ class Galerie extends Component
             // Sans `with`, chaque carte déclencherait ses propres requêtes
             // pour ses images et ses occasions.
             ->with(['media', 'occasions'])
+            // parSlug plutôt que slug_fr : le filtre doit fonctionner avec le
+            // slug de la langue courante, sinon changer de langue sur une
+            // galerie filtrée viderait le résultat.
             ->when($this->occasion, fn ($q) => $q->whereHas(
                 'occasions',
-                fn ($o) => $o->where('slug_fr', $this->occasion)
+                fn ($o) => $o->parSlug($this->occasion)
             ))
             ->when($this->type, fn ($q) => $q->whereHas(
                 'productType',
-                fn ($t) => $t->where('slug_fr', $this->type)
+                fn ($t) => $t->parSlug($this->type)
             ));
 
         $total = $requete->clone()->count();

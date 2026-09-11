@@ -390,7 +390,7 @@
                            class="mt-0.5 rounded border border-sand-300 text-ink-900 focus:ring-sage-400">
                     <span>
                         {{ __('demande.consentement') }}
-                        <a href="{{ url('/confidentialite') }}" target="_blank" rel="noopener"
+                        <a href="{{ route_langue('confidentialite') }}" target="_blank" rel="noopener"
                            class="underline underline-offset-2 hover:text-ink-900">{{ __('demande.consentement_lien') }}</a>
                     </span>
                 </label>

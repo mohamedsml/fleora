@@ -36,7 +36,7 @@
         </div>
 
         <div class="mt-12 flex flex-wrap justify-center gap-4">
-            <x-ui.bouton :href="route('creations')" variante="secondaire">
+            <x-ui.bouton :href="route_langue('creations')" variante="secondaire">
                 {{ __('merci.cta_creations') }}
             </x-ui.bouton>
         </div>

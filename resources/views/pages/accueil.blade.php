@@ -32,10 +32,10 @@
                     </p>
 
                     <div class="mt-10 flex flex-wrap gap-4">
-                        <x-ui.bouton href="{{ url('/demande') }}">
+                        <x-ui.bouton href="{{ route_langue('demande') }}">
                             Demander une soumission
                         </x-ui.bouton>
-                        <x-ui.bouton href="{{ url('/creations') }}" variante="secondaire">
+                        <x-ui.bouton href="{{ route_langue('creations') }}" variante="secondaire">
                             Voir les créations
                         </x-ui.bouton>
                     </div>
@@ -95,7 +95,7 @@
 
                 <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach ($occasions as $occasion)
-                        <a href="{{ route('occasions.show', $occasion->slug_fr) }}"
+                        <a href="{{ route_langue('occasions.show', $occasion->slugPour()) }}"
                            class="group rounded-2xl border border-ink-800/10 bg-ivory-50 p-5 text-center transition duration-300 hover:-translate-y-1 hover:border-blush-300 hover:shadow-lg hover:shadow-blush-500/10">
                             <span class="font-display text-lg text-ink-800 group-hover:text-blush-700">
                                 {{ $occasion->t('nom') }}
@@ -118,7 +118,7 @@
                             Un aperçu de ce qui est possible. Tout se personnalise.
                         </p>
                     </div>
-                    <a href="{{ url('/creations') }}" class="text-sm text-blush-600 underline-offset-4 hover:underline">
+                    <a href="{{ route_langue('creations') }}" class="text-sm text-blush-600 underline-offset-4 hover:underline">
                         Voir toute la galerie →
                     </a>
                 </div>
@@ -227,7 +227,7 @@
                 sans engagement de votre part.
             </p>
             <div class="mt-10">
-                <x-ui.bouton href="{{ url('/demande') }}">
+                <x-ui.bouton href="{{ route_langue('demande') }}">
                     Demander une soumission
                 </x-ui.bouton>
             </div>

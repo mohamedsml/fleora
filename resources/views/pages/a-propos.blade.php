@@ -70,8 +70,8 @@
                 une proposition personnalisée.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <x-ui.bouton :href="route('demande')">Demander une soumission</x-ui.bouton>
-                <x-ui.bouton :href="route('creations')" variante="secondaire">
+                <x-ui.bouton :href="route_langue('demande')">Demander une soumission</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('creations')" variante="secondaire">
                     Voir les créations
                 </x-ui.bouton>
             </div>

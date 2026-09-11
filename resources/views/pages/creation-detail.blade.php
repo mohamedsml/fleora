@@ -46,7 +46,7 @@
 
     <div class="mx-auto max-w-7xl px-6 py-12 lg:py-20">
 
-        <a href="{{ route('creations') }}"
+        <a href="{{ route_langue('creations') }}"
            class="inline-flex items-center gap-2 text-sm text-ink-400 transition hover:text-ink-700">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -117,7 +117,7 @@
                                     {{-- Vers la galerie filtrée : maillage interne
                                          utile au SEO, et parcours naturel pour qui
                                          prépare cet événement précis. --}}
-                                    <a href="{{ route('creations', ['occasion' => $o->slug_fr]) }}"
+                                    <a href="{{ route_langue('creations', ['occasion' => $o->slugPour()]) }}"
                                        class="rounded-full bg-ivory-100 px-3 py-1 text-sm text-ink-600 transition hover:bg-sand-100">
                                         {{ $o->t('nom') }}
                                     </a>
@@ -145,7 +145,7 @@
                      paramètre : le formulaire s'ouvrira pré-rempli, et on saura
                      quelles créations génèrent des demandes. --}}
                 <div class="mt-12">
-                    <x-ui.bouton :href="route('demande', ['creation' => $creation->slug_fr])">
+                    <x-ui.bouton :href="route_langue('demande', ['creation' => $creation->slugPour()])">
                         {{ __('galerie.cta_detail') }}
                     </x-ui.bouton>
                     <p class="mt-3 text-sm text-ink-400">{{ __('galerie.cta_detail_aide') }}</p>

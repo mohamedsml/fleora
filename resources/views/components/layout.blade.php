@@ -4,7 +4,25 @@
     // Retire la page de l'index Google. Pour une page vide ou une confirmation :
     // une page sans contenu indexée dégrade la qualité perçue du domaine entier.
     'noindex' => false,
+    // Entité affichée sur une page de détail. Alimente d'un seul coup le
+    // sélecteur de langue, les hreflang et l'image de partage — trois calculs
+    // séparés finiraient par diverger.
+    'modele' => null,
+    // Image de partage spécifique. À défaut, la photo du modèle, puis l'image
+    // de marque.
+    'image' => null,
 ])
+
+@php
+    $traductions = app(\App\Support\Traductions::class)->pour($modele);
+
+    // og:image : photo de l'entité si elle en a une, sinon l'image de marque.
+    // Un lien partagé sans visuel perd l'essentiel de son pouvoir d'attraction
+    // sur Instagram et Messenger, premiers canaux de découverte ici.
+    $imagePartage = $image
+        ?? $modele?->media?->first()?->urlVariante(1200)
+        ?? asset('images/og-fleora.jpg');
+@endphp
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -37,7 +55,26 @@
     @if ($description)
         <meta property="og:description" content="{{ $description }}">
     @endif
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:url" content="{{ $traductions->canonique() }}">
+    <meta property="og:image" content="{{ $imagePartage }}">
+    <meta property="og:locale" content="{{ str_replace('-', '_', $traductions->codeRegional(app()->getLocale())) }}">
+
+    {{-- Twitter reprend og: quand twitter: manque, mais le format large doit
+         être déclaré explicitement, sinon l'aperçu reste une vignette. --}}
+    <meta name="twitter:card" content="summary_large_image">
+
+    {{-- Canonique : une seule URL fait foi pour un contenu donné. Sans elle,
+         un slug non canonique ou un paramètre de suivi créerait un doublon
+         dans l'index de Google. --}}
+    <link rel="canonical" href="{{ $traductions->canonique() }}">
+
+    {{-- hreflang réciproques : chaque version déclare toutes les autres,
+         elle-même comprise. Un bloc non réciproque est purement ignoré par
+         Google. x-default pointe vers le français, marché principal. --}}
+    @foreach ($traductions->alternatives() as $langue => $url)
+        <link rel="alternate" hreflang="{{ $traductions->codeRegional($langue) }}" href="{{ $url }}">
+    @endforeach
+    <link rel="alternate" hreflang="x-default" href="{{ $traductions->alternatives()[$traductions->langueParDefaut()] }}">
 
     {{-- Favicons. Le SVG est servi en premier aux navigateurs qui le gèrent :
          net à toutes les tailles, contrairement aux PNG. Le .ico reste pour
@@ -68,7 +105,7 @@
          navigation pour atteindre le contenu. Invisible jusqu'au focus. --}}
     <a href="#contenu"
        class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-ink-900 focus:px-5 focus:py-2.5 focus:text-sm focus:text-ivory-50">
-        Aller au contenu
+        {{ __('commun.accessibilite.aller_contenu') }}
     </a>
 
     <x-site.entete />

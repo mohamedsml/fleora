@@ -34,10 +34,6 @@ class AppServiceProvider extends ServiceProvider
      * préfixe de langue : le middleware SetLocale y verrait toujours du
      * français. Sans ce correctif, chaque interaction avec la galerie ou le
      * formulaire sur une page anglaise renverrait des libellés français.
-     *
-     * `addPersistentMiddleware` rejoue le middleware de la requête d'origine
-     * sur les requêtes suivantes du composant — c'est le mécanisme prévu par
-     * Livewire pour exactement ce cas.
      */
     private function conserverLaLangueDansLivewire(): void
     {

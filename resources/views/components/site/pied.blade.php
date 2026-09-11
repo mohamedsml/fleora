@@ -17,7 +17,7 @@
                      class="-ml-3 h-20 w-auto">
 
                 <p class="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
-                    Boîtes décoratives personnalisées, décorées à la main pour vos plus beaux moments.
+                    {{ __('commun.pied.slogan') }}
                 </p>
                 @if ($region)
                     <p class="mt-4 text-sm text-ink-400">{{ $region }}</p>
@@ -25,17 +25,17 @@
             </div>
 
             <div>
-                <h2 class="font-sans text-xs font-semibold uppercase tracking-widest text-ink-400">Navigation</h2>
+                <h2 class="font-sans text-xs font-semibold uppercase tracking-widest text-ink-400">{{ __('commun.pied.navigation') }}</h2>
                 <ul class="mt-5 space-y-3 text-sm">
-                    <li><a href="{{ route('creations') }}" class="text-ink-600 hover:text-blush-600">Créations</a></li>
-                    <li><a href="{{ route('occasions') }}" class="text-ink-600 hover:text-blush-600">Occasions</a></li>
-                    <li><a href="{{ route('a-propos') }}" class="text-ink-600 hover:text-blush-600">À propos</a></li>
-                    <li><a href="{{ route('demande') }}" class="text-ink-600 hover:text-blush-600">Demander une soumission</a></li>
+                    <li><a href="{{ route_langue('creations') }}" class="text-ink-600 hover:text-blush-600">{{ __('commun.nav.creations') }}</a></li>
+                    <li><a href="{{ route_langue('occasions') }}" class="text-ink-600 hover:text-blush-600">{{ __('commun.nav.occasions') }}</a></li>
+                    <li><a href="{{ route_langue('a-propos') }}" class="text-ink-600 hover:text-blush-600">{{ __('commun.nav.a_propos') }}</a></li>
+                    <li><a href="{{ route_langue('demande') }}" class="text-ink-600 hover:text-blush-600">{{ __('commun.cta.soumission') }}</a></li>
                 </ul>
             </div>
 
             <div>
-                <h2 class="font-sans text-xs font-semibold uppercase tracking-widest text-ink-400">Nous joindre</h2>
+                <h2 class="font-sans text-xs font-semibold uppercase tracking-widest text-ink-400">{{ __('commun.pied.joindre') }}</h2>
                 <ul class="mt-5 space-y-3 text-sm">
                     @if ($courriel)
                         <li>
@@ -61,8 +61,8 @@
         </div>
 
         <div class="mt-14 flex flex-col gap-4 border-t border-ink-800/10 pt-8 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {{ now()->year }} {{ config('app.name') }}. Tous droits réservés.</p>
-            <a href="{{ route('confidentialite') }}" class="hover:text-blush-600">Politique de confidentialité</a>
+            <p>© {{ now()->year }} {{ config('app.name') }}. {{ __('commun.pied.droits') }}</p>
+            <a href="{{ route_langue('confidentialite') }}" class="hover:text-blush-600">{{ __('commun.pied.confidentialite') }}</a>
         </div>
     </div>
 </footer>

@@ -28,11 +28,11 @@
 
                 @foreach ($occasions as $o)
                     <button type="button"
-                            wire:click="filtrerOccasion('{{ $o->slug_fr }}')"
+                            wire:click="filtrerOccasion('{{ $o->slugPour() }}')"
                             @class([
                                 'rounded-full px-4 py-2 text-sm transition',
-                                'bg-ink-900 text-ivory-50' => $occasion === $o->slug_fr,
-                                'bg-ivory-100 text-ink-600 hover:bg-sand-100' => $occasion !== $o->slug_fr,
+                                'bg-ink-900 text-ivory-50' => $occasion === $o->slugPour(),
+                                'bg-ivory-100 text-ink-600 hover:bg-sand-100' => $occasion !== $o->slugPour(),
                             ])>
                         {{ $o->t('nom') }}
                     </button>
@@ -47,11 +47,11 @@
                 <div class="flex gap-2 whitespace-nowrap">
                     @foreach ($types as $t)
                         <button type="button"
-                                wire:click="filtrerType('{{ $t->slug_fr }}')"
+                                wire:click="filtrerType('{{ $t->slugPour() }}')"
                                 @class([
                                     'rounded-full border px-4 py-1.5 text-xs uppercase tracking-widest transition',
-                                    'border-terracotta-400 bg-terracotta-50 text-terracotta-700' => $type === $t->slug_fr,
-                                    'border-sand-200 text-ink-400 hover:border-sand-300' => $type !== $t->slug_fr,
+                                    'border-terracotta-400 bg-terracotta-50 text-terracotta-700' => $type === $t->slugPour(),
+                                    'border-sand-200 text-ink-400 hover:border-sand-300' => $type !== $t->slugPour(),
                                 ])>
                             {{ $t->t('nom') }}
                         </button>

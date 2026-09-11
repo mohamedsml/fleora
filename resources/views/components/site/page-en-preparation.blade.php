@@ -33,8 +33,8 @@
             </p>
 
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <x-ui.bouton :href="route('creations')">Voir les créations</x-ui.bouton>
-                <x-ui.bouton :href="route('demande')" variante="secondaire">
+                <x-ui.bouton :href="route_langue('creations')">Voir les créations</x-ui.bouton>
+                <x-ui.bouton :href="route_langue('demande')" variante="secondaire">
                     Demander une soumission
                 </x-ui.bouton>
             </div>
