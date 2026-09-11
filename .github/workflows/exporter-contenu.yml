@@ -30,7 +30,9 @@ jobs:
       - name: Télécharger l'archive
         run: |
           mkdir -p archive
-          printf '%s' "${{ secrets.HOSTINGER_SSH_KEY }}" > cle
+          # Le saut de ligne final est indispensable : sans lui OpenSSH
+          # refuse la clé avec « error in libcrypto ».
+          printf '%s\n' "${{ secrets.HOSTINGER_SSH_KEY }}" > cle
           chmod 600 cle
           scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
               -i cle -P "${{ secrets.HOSTINGER_PORT }}" \
