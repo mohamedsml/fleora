@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnregistrerVisite;
 use App\Http\Middleware\EnTetesSecurite;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // En-têtes de sécurité sur toutes les réponses HTTP, y compris les
         // pages d'erreur et l'administration.
         $middleware->append(EnTetesSecurite::class);
+
+        // Statistiques de visite. Écrit après l'envoi de la réponse : le
+        // visiteur n'attend jamais la mesure.
+        $middleware->appendToGroup('web', EnregistrerVisite::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

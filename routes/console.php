@@ -53,3 +53,12 @@ Schedule::command('fleora:purger-demandes')
  */
 Schedule::command('fleora:sauvegarder')
     ->dailyAt('03:00');
+
+/*
+ * Purge des statistiques de visite.
+ *
+ * Sans elle, la table devient le plus gros objet de la base en un an — pour des
+ * données dont le détail ne sert plus au-delà de quelques mois.
+ */
+Schedule::command('fleora:purger-visites')
+    ->weeklyOn(1, '04:00');

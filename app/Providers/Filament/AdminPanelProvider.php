@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\CreationsLesPlusConsultees;
+use App\Filament\Widgets\PagesLesPlusVues;
+use App\Filament\Widgets\SourcesDeTrafic;
+use App\Filament\Widgets\StatistiquesVisites;
 use App\Models\User;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -12,7 +16,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -136,8 +139,13 @@ class AdminPanelProvider extends PanelProvider
                     ->authorize(fn () => (bool) auth()->user()?->actif),
             ])
             ->widgets([
+                // Statistiques de visite : les chiffres à voir en ouvrant
+                // l'administration, avant toute autre chose.
+                StatistiquesVisites::class,
+                PagesLesPlusVues::class,
+                SourcesDeTrafic::class,
+                CreationsLesPlusConsultees::class,
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

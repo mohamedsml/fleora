@@ -38,6 +38,10 @@ return [
 
     'conservation' => [
         'demandes_mois' => 24,
+
+        // Les statistiques n'ont pas de valeur au-delà d'une comparaison
+        // annuelle, et l'espace est partagé sur mutualisé.
+        'visites_mois' => 12,
     ],
 
     /*
