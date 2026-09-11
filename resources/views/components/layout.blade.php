@@ -9,7 +9,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ $titre ? $titre.' — '.config('app.name') : config('app.name') }}</title>
+    {{-- Un onglet n'affiche qu'une vingtaine de caractères dès que plusieurs
+         sont ouverts. Le nom vient donc en premier : placé à la fin, il était
+         systématiquement tronqué. L'accueil porte la promesse commerciale, les
+         autres pages leur libellé court. --}}
+    <title>{{ $titre ? config('app.name').' — '.$titre : config('app.name') }}</title>
 
     @if ($description)
         <meta name="description" content="{{ $description }}">
@@ -19,11 +23,26 @@
          Facebook, Instagram ou par message — canal de découverte principal
          pour ce type de produit. --}}
     <meta property="og:type" content="website">
+    {{-- og:site_name porte la marque dans l'aperçu partagé : le titre reste
+         donc court et descriptif, sans répéter « Fleora ». --}}
+    <meta property="og:site_name" content="{{ config('app.name') }}">
     <meta property="og:title" content="{{ $titre ?? config('app.name') }}">
     @if ($description)
         <meta property="og:description" content="{{ $description }}">
     @endif
     <meta property="og:url" content="{{ url()->current() }}">
+
+    {{-- Favicons. Le SVG est servi en premier aux navigateurs qui le gèrent :
+         net à toutes les tailles, contrairement aux PNG. Le .ico reste pour
+         les anciens navigateurs et les raccourcis Windows. --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
+    {{-- Teinte la barre d'adresse sur mobile : le brun-taupe de la marque. --}}
+    <meta name="theme-color" content="#67523e">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

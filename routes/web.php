@@ -69,3 +69,12 @@ Route::view('/demande', 'pages.demande')->name('demande');
 // Page de confirmation distincte, et non une modale : c'est le seul repère
 // mesurable proprement dans un outil d'analytique.
 Route::view('/merci', 'pages.merci')->name('merci');
+
+/*
+|--------------------------------------------------------------------------
+| Pages légales
+|--------------------------------------------------------------------------
+*/
+
+// Obligation Loi 25, et le formulaire de demande y renvoie.
+Route::view('/confidentialite', 'pages.confidentialite')->name('confidentialite');

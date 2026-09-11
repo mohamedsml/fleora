@@ -95,6 +95,15 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Sans cela, l'onglet de l'administration porte le logo de
+            // Filament : le SVG reste net quel que soit l'écran.
+            ->favicon(asset('favicon.svg'))
+            // brandName reste défini : il sert de texte alternatif au logo.
+            ->brandName(config('app.name'))
+            ->brandLogo(asset('images/logo-fleora.svg'))
+            // 3rem et non 2rem : le SVG intègre ses marges, le dessin ne
+            // remplit que ~62 % de la hauteur du fichier.
+            ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -16,8 +16,18 @@
 <header x-data="{ ouvert: false }"
         class="sticky top-0 z-40 border-b border-ink-800/5 bg-ivory-50/85 backdrop-blur-md">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-        <a href="{{ url('/') }}" class="font-display text-3xl tracking-tight text-ink-900">
-            {{ config('app.name') }}
+        {{-- width/height explicites au ratio du viewBox (640×180) : réserve la
+             place avant le chargement, sinon la barre sursaute.
+
+             La hauteur paraît élevée car le SVG intègre ses propres marges :
+             le dessin n'occupe que ~62 % de la hauteur du viewBox. À h-16 le
+             logo lui-même mesure ~40 px. Le décalage négatif rattrape la marge
+             gauche du fichier pour aligner le logo sur la grille de la page. --}}
+        <a href="{{ url('/') }}" aria-label="{{ config('app.name') }} — accueil" class="-ml-3">
+            <img src="{{ asset('images/logo-fleora.svg') }}"
+                 alt="{{ config('app.name') }}"
+                 width="640" height="180"
+                 class="h-16 w-auto">
         </a>
 
         <nav class="hidden items-center gap-9 lg:flex" aria-label="Navigation principale">

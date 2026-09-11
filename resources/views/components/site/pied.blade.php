@@ -11,7 +11,11 @@
     <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div class="grid gap-12 md:grid-cols-3">
             <div>
-                <p class="font-display text-3xl text-ink-900">{{ config('app.name') }}</p>
+                <img src="{{ asset('images/logo-fleora.svg') }}"
+                     alt="{{ config('app.name') }}"
+                     width="640" height="180"
+                     class="-ml-3 h-20 w-auto">
+
                 <p class="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
                     Boîtes décoratives personnalisées, décorées à la main pour vos plus beaux moments.
                 </p>
