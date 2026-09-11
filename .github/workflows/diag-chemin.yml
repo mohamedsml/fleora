@@ -1,4 +1,4 @@
-name: Diagnostic sitemap
+name: Diagnostic APP_URL
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ jobs:
     environment:
       name: Hostinger Fleora
     steps:
-      - name: Générer le sitemap et lire l'erreur
+      - name: Lire et corriger APP_URL
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -17,13 +17,31 @@ jobs:
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
+            set -e
             cd "$HOME/domains/fleora.ca/fleora"
             PHP=/opt/alt/php83/usr/bin/php
-            echo "--- commande enregistrée ? ---"
-            $PHP artisan list 2>&1 | grep -i "fleora" || echo "(aucune commande fleora)"
-            echo "--- exécution ---"
-            $PHP artisan fleora:sitemap 2>&1 | tail -20
-            echo "--- fichier produit ? ---"
-            ls -l public/sitemap.xml 2>&1
-            echo "--- droits du dossier public ---"
-            ls -ld public
+
+            echo "--- avant ---"
+            grep -nE '^(APP_URL|APP_ENV|APP_DEBUG|ASSET_URL)=' .env
+
+            cp .env ".env.sauvegarde-$(date +%Y%m%d-%H%M%S)"
+
+            # APP_URL sert à tout ce qui est généré hors requête HTTP : les
+            # URL du sitemap et les liens des courriels. Sur localhost, le
+            # sitemap est inexploitable par Google et les liens des courriels
+            # de confirmation pointent dans le vide.
+            sed -i 's|^APP_URL=.*|APP_URL=https://fleora.ca|' .env
+
+            echo "--- après ---"
+            grep -nE '^(APP_URL|APP_ENV|APP_DEBUG)=' .env
+
+            echo "--- reconstruction des caches ---"
+            $PHP artisan config:clear >/dev/null
+            $PHP artisan config:cache >/dev/null
+            $PHP artisan route:cache >/dev/null
+            echo "caches reconstruits"
+
+            echo "--- régénération du sitemap ---"
+            $PHP artisan fleora:sitemap 2>&1 | tail -3
+            echo "--- premières URL ---"
+            grep -oE '<loc>[^<]+</loc>' public/sitemap.xml | head -4
