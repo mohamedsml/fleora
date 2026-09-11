@@ -12,29 +12,69 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * Données de développement uniquement.
+     * Base de développement complète, en une commande.
      *
-     * Ce seeder est celui qu'exécute `db:seed` sans `--class` : c'est la
-     * commande qu'on tape par réflexe. En production, il créerait un compte
-     * `test@example.com` dont le mot de passe vient d'une factory — donc un
-     * accès à l'administration, aux demandes clientes et aux devis.
+     * C'est ce que rejoue `make fresh` : un compte d'administration, le
+     * contenu de démonstration et ses traductions. Après un `migrate:fresh`,
+     * le site local est immédiatement utilisable — sans avoir à recréer un
+     * compte à la main, ce qui était le cas avant.
      *
-     * Le refus est ici plutôt que dans la documentation : un avertissement se
-     * lit une fois, un garde-fou protège à chaque exécution. Pour la
-     * production, voir ProductionSeeder.
+     * Les identifiants viennent du `.env` (FLEORA_ADMIN_COURRIEL et
+     * FLEORA_ADMIN_MOT_DE_PASSE) : ils dépendent de la machine, pas du dépôt,
+     * et n'ont donc rien à faire dans le code versionné.
+     *
+     * En production, voir ProductionSeeder — celui-ci refuse de s'exécuter.
      */
     public function run(): void
     {
+        // `db:seed` sans --class exécute ce seeder : c'est la commande qu'on
+        // tape par réflexe. En production, elle créerait un accès à
+        // l'administration avec un mot de passe connu du dépôt. Le refus est
+        // ici plutôt que dans la documentation : un avertissement se lit une
+        // fois, un garde-fou protège à chaque exécution.
         if (app()->environment('production')) {
             throw new RuntimeException(
-                'DatabaseSeeder crée un utilisateur de test : il ne doit jamais '
-                .'tourner en production. Utiliser `db:seed --class=ProductionSeeder`.'
+                'DatabaseSeeder crée un compte d’administration de développement : '
+                .'il ne doit jamais tourner en production. '
+                .'Utiliser `db:seed --class=ProductionSeeder`.'
             );
         }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->creerAdministrateur();
+
+        // Contenu de démonstration : sans lui, une base fraîche donne un site
+        // vide, où rien ne peut être vérifié visuellement.
+        $this->call([
+            DemoSeeder::class,
+            TraductionsSeeder::class,
         ]);
+    }
+
+    private function creerAdministrateur(): void
+    {
+        $courriel = config('fleora.admin.courriel');
+        $motDePasse = config('fleora.admin.mot_de_passe');
+
+        if (blank($courriel) || blank($motDePasse)) {
+            $this->command?->warn(
+                'Aucun compte créé : renseigner FLEORA_ADMIN_COURRIEL et '
+                .'FLEORA_ADMIN_MOT_DE_PASSE dans le .env (voir .env.example).'
+            );
+
+            return;
+        }
+
+        // updateOrCreate : rejouer le seed sur une base existante remet le mot
+        // de passe du .env plutôt que d'échouer sur l'unicité du courriel.
+        $utilisateur = User::updateOrCreate(
+            ['email' => $courriel],
+            [
+                'name' => config('fleora.admin.nom'),
+                'password' => $motDePasse,
+                'actif' => true,
+            ],
+        );
+
+        $this->command?->info("Administration : {$utilisateur->email}");
     }
 }

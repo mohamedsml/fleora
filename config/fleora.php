@@ -131,4 +131,25 @@ return [
 
     'auto_login' => env('FLEORA_AUTO_LOGIN', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Compte d'administration recréé par les seeds (développement)
+    |--------------------------------------------------------------------------
+    |
+    | Utilisé par DatabaseSeeder, donc par `make fresh`. Les trois valeurs
+    | vivent dans le .env et non dans le dépôt : elles dépendent de la machine,
+    | et un mot de passe versionné finirait par se retrouver ailleurs.
+    |
+    | Aucun défaut pour le mot de passe : sans lui, le seeder n'écrit rien et le
+    | dit. Un défaut comme « password » serait tôt ou tard emporté en
+    | production par un .env recopié.
+    |
+    */
+
+    'admin' => [
+        'nom' => env('FLEORA_ADMIN_NOM', 'Administration'),
+        'courriel' => env('FLEORA_ADMIN_COURRIEL'),
+        'mot_de_passe' => env('FLEORA_ADMIN_MOT_DE_PASSE'),
+    ],
+
 ];
