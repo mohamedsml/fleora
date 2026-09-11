@@ -95,7 +95,7 @@
 
                 <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach ($occasions as $occasion)
-                        <a href="{{ url('/occasions/'.$occasion->slug_fr) }}"
+                        <a href="{{ route('occasions.show', $occasion->slug_fr) }}"
                            class="group rounded-2xl border border-ink-800/10 bg-ivory-50 p-5 text-center transition duration-300 hover:-translate-y-1 hover:border-blush-300 hover:shadow-lg hover:shadow-blush-500/10">
                             <span class="font-display text-lg text-ink-800 group-hover:text-blush-700">
                                 {{ $occasion->t('nom') }}

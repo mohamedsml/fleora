@@ -1,6 +1,9 @@
 @props([
     'titre' => null,
     'description' => null,
+    // Retire la page de l'index Google. Pour une page vide ou une confirmation :
+    // une page sans contenu indexée dégrade la qualité perçue du domaine entier.
+    'noindex' => false,
 ])
 
 <!DOCTYPE html>
@@ -17,6 +20,10 @@
 
     @if ($description)
         <meta name="description" content="{{ $description }}">
+    @endif
+
+    @if ($noindex)
+        <meta name="robots" content="noindex, follow">
     @endif
 
     {{-- Open Graph : contrôle l'aperçu quand un lien est partagé sur

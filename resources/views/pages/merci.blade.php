@@ -4,10 +4,10 @@
     $numero = session('demande_numero');
 @endphp
 
-<x-layout :titre="__('merci.titre')" description="">
-    {{-- Page de confirmation : elle sert aussi de repère de conversion pour
-         l'analytique — une modale ne se mesure pas proprement. --}}
-    <meta name="robots" content="noindex">
+{{-- noindex : une page de confirmation n'a rien à faire dans les résultats de
+     recherche, et elle n'a de sens qu'après un envoi. Elle sert de repère de
+     conversion pour l'analytique — une modale ne se mesure pas proprement. --}}
+<x-layout :titre="__('merci.titre')" description="" noindex>
 
     <div class="mx-auto max-w-2xl px-6 py-24 text-center lg:py-32">
 

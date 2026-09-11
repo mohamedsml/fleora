@@ -27,10 +27,10 @@
             <div>
                 <h2 class="font-sans text-xs font-semibold uppercase tracking-widest text-ink-400">Navigation</h2>
                 <ul class="mt-5 space-y-3 text-sm">
-                    <li><a href="{{ url('/creations') }}" class="text-ink-600 hover:text-blush-600">Créations</a></li>
-                    <li><a href="{{ url('/occasions') }}" class="text-ink-600 hover:text-blush-600">Occasions</a></li>
-                    <li><a href="{{ url('/a-propos') }}" class="text-ink-600 hover:text-blush-600">À propos</a></li>
-                    <li><a href="{{ url('/demande') }}" class="text-ink-600 hover:text-blush-600">Demander une soumission</a></li>
+                    <li><a href="{{ route('creations') }}" class="text-ink-600 hover:text-blush-600">Créations</a></li>
+                    <li><a href="{{ route('occasions') }}" class="text-ink-600 hover:text-blush-600">Occasions</a></li>
+                    <li><a href="{{ route('a-propos') }}" class="text-ink-600 hover:text-blush-600">À propos</a></li>
+                    <li><a href="{{ route('demande') }}" class="text-ink-600 hover:text-blush-600">Demander une soumission</a></li>
                 </ul>
             </div>
 
@@ -62,7 +62,7 @@
 
         <div class="mt-14 flex flex-col gap-4 border-t border-ink-800/10 pt-8 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
             <p>© {{ now()->year }} {{ config('app.name') }}. Tous droits réservés.</p>
-            <a href="{{ url('/confidentialite') }}" class="hover:text-blush-600">Politique de confidentialité</a>
+            <a href="{{ route('confidentialite') }}" class="hover:text-blush-600">Politique de confidentialité</a>
         </div>
     </div>
 </footer>

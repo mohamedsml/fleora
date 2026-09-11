@@ -5,9 +5,9 @@
     $liens = [
         ['url' => route('accueil'), 'libelle' => 'Accueil'],
         ['url' => route('creations'), 'libelle' => 'Créations'],
-        ['url' => url('/occasions'), 'libelle' => 'Occasions'],
-        ['url' => url('/a-propos'), 'libelle' => 'À propos'],
-        ['url' => url('/contact'), 'libelle' => 'Contact'],
+        ['url' => route('occasions'), 'libelle' => 'Occasions'],
+        ['url' => route('a-propos'), 'libelle' => 'À propos'],
+        ['url' => route('contact'), 'libelle' => 'Contact'],
     ];
 @endphp
 
@@ -23,7 +23,7 @@
              le dessin n'occupe que ~62 % de la hauteur du viewBox. À h-16 le
              logo lui-même mesure ~40 px. Le décalage négatif rattrape la marge
              gauche du fichier pour aligner le logo sur la grille de la page. --}}
-        <a href="{{ url('/') }}" aria-label="{{ config('app.name') }} — accueil" class="-ml-3">
+        <a href="{{ route('accueil') }}" aria-label="{{ config('app.name') }} — accueil" class="-ml-3">
             <img src="{{ asset('images/logo-fleora.svg') }}"
                  alt="{{ config('app.name') }}"
                  width="640" height="180"
@@ -43,7 +43,7 @@
                 </a>
             @endforeach
 
-            <x-ui.bouton href="{{ url('/demande') }}" class="!px-6 !py-2.5">
+            <x-ui.bouton href="{{ route('demande') }}" class="!px-6 !py-2.5">
                 Demander une soumission
             </x-ui.bouton>
         </nav>
@@ -71,7 +71,7 @@
                 </a>
             @endforeach
 
-            <x-ui.bouton href="{{ url('/demande') }}" class="mt-4 w-full">
+            <x-ui.bouton href="{{ route('demande') }}" class="mt-4 w-full">
                 Demander une soumission
             </x-ui.bouton>
         </nav>

@@ -60,6 +60,36 @@ Route::get('/creations/{slug}', function (string $slug) {
 
 /*
 |--------------------------------------------------------------------------
+| Occasions
+|--------------------------------------------------------------------------
+| Hub par événement. Les pages de détail (/occasions/mariage…) viendront
+| ensuite : ce sont elles qui portent le référencement à forte intention.
+*/
+
+Route::get('/occasions', function () {
+    return view('pages.occasions', [
+        // `with` sur media : sans lui, chaque vignette déclencherait sa propre
+        // requête.
+        'occasions' => Occasion::publie()->with('media')->get(),
+    ]);
+})->name('occasions');
+
+Route::get('/occasions/{slug}', function (string $slug) {
+    $occasion = Occasion::publie()->where('slug_fr', $slug)->firstOrFail();
+
+    $requete = Creation::publie()
+        ->with(['media', 'occasions'])
+        ->whereHas('occasions', fn ($q) => $q->whereKey($occasion->id));
+
+    return view('pages.occasion-detail', [
+        'occasion' => $occasion,
+        'creations' => $requete->clone()->take(6)->get(),
+        'total' => $requete->count(),
+    ]);
+})->name('occasions.show');
+
+/*
+|--------------------------------------------------------------------------
 | Conversion
 |--------------------------------------------------------------------------
 */
@@ -78,3 +108,17 @@ Route::view('/merci', 'pages.merci')->name('merci');
 
 // Obligation Loi 25, et le formulaire de demande y renvoie.
 Route::view('/confidentialite', 'pages.confidentialite')->name('confidentialite');
+
+/*
+|--------------------------------------------------------------------------
+| Pages en préparation
+|--------------------------------------------------------------------------
+| Annoncées dans la navigation, contenu à écrire. Elles répondent en 200 avec
+| une action possible plutôt qu'une 404 — et portent `noindex` tant qu'elles
+| sont vides : une page sans contenu indexée dégrade la qualité perçue du
+| domaine entier.
+*/
+
+Route::view('/a-propos', 'pages.a-propos')->name('a-propos');
+Route::view('/contact', 'pages.contact')->name('contact');
+Route::view('/faq', 'pages.faq')->name('faq');
