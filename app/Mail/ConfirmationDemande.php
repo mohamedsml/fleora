@@ -39,6 +39,10 @@ class ConfirmationDemande extends Mailable
     {
         return new Content(
             markdown: 'mail.confirmation-demande',
+            // Version texte explicite : sans elle, le text/plain dérivé du
+            // Markdown garde le balisage et fait chuter le ratio texte/HTML,
+            // que les filtres lisent comme un signal de pourriel.
+            text: 'mail.confirmation-demande-texte',
             with: [
                 'demande' => $this->demande,
                 'delai' => config('fleora.contact.delai_reponse_h'),

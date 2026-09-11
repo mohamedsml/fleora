@@ -1,0 +1,62 @@
+{{-- Version texte brut de la confirmation.
+
+     Sans elle, Laravel dérive un text/plain du Markdown en y laissant le
+     balisage : le rapport de délivrabilité tombait à 6 % de texte pour 16 Ko
+     de HTML, un ratio que les filtres lisent comme un signal de pourriel.
+
+     Les mêmes clés de traduction que la version HTML sont réutilisées : une
+     correction de texte reste ainsi appliquée aux deux. --}}
+{{ __('courriels.confirmation.titre', ['prenom' => Str::before($demande->nom, ' ')]) }}
+
+{{ __('courriels.confirmation.intro', ['delai' => $delai]) }}
+
+{{ __('courriels.champs.numero') }} : {{ $demande->numero_suivi }}
+
+{{ __('courriels.confirmation.recapitulatif') }}
+@if ($demande->occasionLibelle())
+
+{{ __('courriels.champs.occasion') }} : {{ $demande->occasionLibelle() }}
+@endif
+@if ($demande->date_evenement)
+
+{{ __('courriels.champs.date') }} : {{ $demande->date_evenement->translatedFormat('j F Y') }}
+@endif
+@if ($demande->productType)
+
+{{ __('courriels.champs.type') }} : {{ $demande->productType->t('nom') }}
+@endif
+@if ($demande->quantite)
+
+{{ __('courriels.champs.quantite') }} : {{ __('demande.quantites.'.$demande->quantite) }}
+@endif
+@if ($demande->texte_a_inscrire)
+
+{{ __('courriels.champs.texte') }} : {{ $demande->texte_a_inscrire }}
+@endif
+@if ($demande->couleurs)
+
+{{ __('courriels.champs.couleurs') }} : {{ collect($demande->couleurs)->map(fn ($c) => config("fleora.palettes.{$c}.libelle", $c))->join(', ') }}
+@endif
+@if ($demande->creationReference)
+
+{{ __('courriels.champs.inspiration') }} : {{ $demande->creationReference->t('titre') }}
+@endif
+@if ($demande->attachments->isNotEmpty())
+
+{{ __('courriels.champs.images') }} : {{ trans_choice('courriels.champs.images_count', $demande->attachments->count()) }}
+@endif
+@if ($demande->estUrgente())
+
+{{ __('courriels.confirmation.delai_serre') }}
+@endif
+
+{{ __('courriels.confirmation.cta') }} : {{ route_langue('creations') }}
+
+{{ __('courriels.confirmation.signature') }}
+{{ config('app.name') }}
+
+--
+{{ __('courriels.confirmation.subcopy', [
+    'courriel' => config('fleora.contact.courriel'),
+    'numero' => $demande->numero_suivi,
+]) }}

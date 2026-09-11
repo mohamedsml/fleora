@@ -48,9 +48,9 @@
 {{ __('courriels.nouvelle.images_admin') }}
 @endif
 
-{{-- Lien vers l'accueil du back-office : la ressource Filament dédiée aux
-     demandes n'existe pas encore, et un lien mort dans un courriel est pire
-     qu'un lien générique. --}}
+{{-- Lien vers l'accueil du back-office plutôt que vers la fiche : l'URL d'une
+     ressource Filament dépend de sa route nommée, qui changerait sans qu'un
+     courriel déjà envoyé puisse être corrigé. --}}
 <x-mail::button :url="url('/admin')">
 {{ __('courriels.nouvelle.cta') }}
 </x-mail::button>

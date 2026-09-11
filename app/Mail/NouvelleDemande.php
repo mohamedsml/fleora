@@ -46,6 +46,7 @@ class NouvelleDemande extends Mailable
     {
         return new Content(
             markdown: 'mail.nouvelle-demande',
+            text: 'mail.nouvelle-demande-texte',
             with: ['demande' => $this->demande],
         );
     }
