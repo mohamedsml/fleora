@@ -1,0 +1,41 @@
+name: Diagnostic accès admin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Inventaire des comptes
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            PHP=/opt/alt/php83/usr/bin/php
+            $PHP -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+              printf("utilisateurs   : %d%s", App\Models\User::count(), PHP_EOL);
+              foreach (App\Models\User::orderBy("id")->get() as $u) {
+                printf("  #%d %-32s actif=%s cree=%s%s",
+                  $u->id, $u->email, var_export((bool)$u->actif, true),
+                  $u->created_at?->format("Y-m-d H:i") ?? "?", PHP_EOL);
+              }
+
+              printf("%soccasions      : %d%s", PHP_EOL, App\Models\Occasion::count(), PHP_EOL);
+              printf("faqs           : %d%s", App\Models\Faq::count(), PHP_EOL);
+              printf("creations      : %d%s", App\Models\Creation::count(), PHP_EOL);
+              printf("demandes       : %d%s", App\Models\CustomRequest::count(), PHP_EOL);
+              printf("visites        : %d%s", App\Models\Visite::count(), PHP_EOL);
+              printf("sessions       : %d%s", DB::table("sessions")->count(), PHP_EOL);
+            '
+            echo "--- sauvegardes disponibles ---"
+            ls -lt ~/backups/fleora/ 2>/dev/null | head -6 || ls -lt backups/fleora/ 2>/dev/null | head -6
