@@ -78,11 +78,30 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    // Le défaut du CODE, pas seulement du .env : avec `config:cache` en
+    // production et un .env incomplet, un défaut 'en' basculerait tout le site
+    // en anglais sans la moindre erreur visible.
+    'locale' => env('APP_LOCALE', 'fr'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    // Jamais 'en' : une clé de traduction manquante doit retomber en français,
+    // la langue de référence du contenu.
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'fr'),
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'fr_CA'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Langues du site
+    |--------------------------------------------------------------------------
+    |
+    | La première est la langue par défaut : elle occupe la racine du domaine
+    | (/creations) tandis que les autres sont préfixées (/en/creations). Le
+    | français est placé en tête parce que le marché principal est le Grand
+    | Montréal, et parce que la racine porte l'autorité de domaine.
+    |
+    */
+
+    'locales' => ['fr', 'en'],
 
     /*
     |--------------------------------------------------------------------------
