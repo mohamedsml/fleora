@@ -7,6 +7,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -17,6 +18,13 @@ class OccasionsTable
     {
         return $table
             ->columns([
+                // Repère immédiatement les occasions sans photo : leur carte
+                // s'affiche alors en aplat dégradé sur le site public.
+                ImageColumn::make('photo')
+                    ->label('')
+                    ->state(fn ($record) => $record->media->first()?->urlVariante(400))
+                    ->height(44)
+                    ->extraImgAttributes(['class' => 'rounded-lg object-cover']),
                 TextColumn::make('nom_fr')
                     ->label('Occasion')
                     ->searchable()

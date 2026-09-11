@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Occasions\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -76,6 +77,39 @@ class OccasionForm
                             ]),
                     ])
                     ->columnSpanFull(),
+
+                Section::make('Photo')
+                    ->description('Image affichée sur la carte de l’occasion et en haut de sa page.')
+                    ->schema([
+                        FileUpload::make('photos')
+                            ->hiddenLabel()
+                            ->image()
+                            // Une seule photo, contrairement aux créations :
+                            // la carte n'en affiche qu'une, et la page
+                            // d'occasion montre ensuite les créations liées.
+                            ->multiple()
+                            ->maxFiles(1)
+                            ->openable()
+                            ->panelLayout('grid')
+                            ->imagePreviewHeight('180')
+                            // HEIC : format par défaut des iPhone. L'omettre
+                            // reviendrait à refuser la moitié des photos.
+                            ->acceptedFileTypes([
+                                'image/jpeg', 'image/png', 'image/webp',
+                                'image/heic', 'image/heif',
+                            ])
+                            ->maxSize(10 * 1024)
+                            // Filament écrit le fichier lui-même : c'est la
+                            // seule façon qu'il sache réafficher la photo
+                            // existante à la réouverture de la fiche.
+                            // ImageService reprend ensuite le fichier pour
+                            // générer les variantes WebP.
+                            ->disk('public')
+                            ->directory('media/occasions')
+                            ->helperText('JPG, PNG, WebP ou HEIC — 10 Mo maximum. '
+                                .'Format carré de préférence : la carte l’affiche en 1:1.')
+                            ->columnSpanFull(),
+                    ]),
 
                 Section::make('Affichage')
                     ->schema([
