@@ -272,6 +272,40 @@ Le workflow vérifie d'abord (style, 31 tests, assets). **Si une vérification
 
 ---
 
+## Charger le contenu initial *(une seule fois)*
+
+À faire après le premier déploiement, sur une base encore vide.
+
+```bash
+cd ~/domains/fleora.ca/fleora
+/opt/alt/php83/usr/bin/php artisan db:seed --class=ProductionSeeder --force
+/opt/alt/php83/usr/bin/php artisan db:seed --class=TraductionsSeeder --force
+```
+
+Ce que cela pose :
+
+| | |
+|---|---|
+| 6 occasions, 4 types de produit | **publiés** — ils font vivre les filtres et les pages d'occasion |
+| 12 FAQ, traduites | **publiées** |
+| 6 créations de démonstration | **en brouillon**, sans photo |
+| Réglages du site, Instagram | renseignés |
+
+> **Les créations restent en brouillon délibérément.** Elles sont fictives :
+> titres inventés, prix approximatifs, aucune photo. Publiées, elles
+> annonceraient un catalogue qui n'existe pas — sur un site vitrine, la photo
+> est le premier facteur de conversion. Elles servent de gabarits : ouvrir
+> `/admin`, remplacer le titre, téléverser les photos, publier.
+
+Les deux commandes sont **rejouables sans risque** : tout passe par
+`updateOrCreate`, `TraductionsSeeder` ne remplit que les champs anglais vides,
+et un rejeu ne dépublie jamais une création complétée à la main.
+
+> ⚠️ Ne **jamais** lancer `db:seed` sans `--class` en production : le
+> `DatabaseSeeder` par défaut crée un utilisateur `test@example.com`.
+
+---
+
 ## Avant chaque déploiement
 
 **Si vous avez modifié du CSS ou du JS :**
