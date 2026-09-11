@@ -111,14 +111,17 @@ Route::view('/confidentialite', 'pages.confidentialite')->name('confidentialite'
 
 /*
 |--------------------------------------------------------------------------
-| Pages en préparation
+| Pages éditoriales
 |--------------------------------------------------------------------------
-| Annoncées dans la navigation, contenu à écrire. Elles répondent en 200 avec
-| une action possible plutôt qu'une 404 — et portent `noindex` tant qu'elles
-| sont vides : une page sans contenu indexée dégrade la qualité perçue du
-| domaine entier.
+| Le texte d'À propos est provisoire et signalé comme tel dans la vue : une
+| histoire d'artisan ne s'invente pas, et c'est précisément elle qui vend.
 */
 
 Route::view('/a-propos', 'pages.a-propos')->name('a-propos');
 Route::view('/contact', 'pages.contact')->name('contact');
-Route::view('/faq', 'pages.faq')->name('faq');
+
+Route::get('/faq', function () {
+    return view('pages.faq', [
+        'faqs' => Faq::publie()->get(),
+    ]);
+})->name('faq');

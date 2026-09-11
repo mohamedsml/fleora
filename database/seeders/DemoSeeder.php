@@ -90,25 +90,48 @@ class DemoSeeder extends Seeder
             );
         }
 
+        // Catégories : une liste à plat se parcourt mal, on cherche presque
+        // toujours dans un thème précis.
         $faqs = [
-            ['q' => 'Combien de temps à l’avance dois-je commander ?', 'r' => 'Idéalement 2 à 3 semaines avant votre événement. Pour les grandes quantités, comptez 4 semaines.', 'accueil' => true],
-            ['q' => 'Utilisez-vous des fleurs naturelles ou artificielles ?', 'r' => 'Les deux. Les fleurs artificielles haut de gamme se conservent indéfiniment ; les naturelles apportent un parfum et une fraîcheur incomparables mais durent quelques jours.', 'accueil' => true],
-            ['q' => 'Livrez-vous à Laval et sur la Rive-Nord ?', 'r' => 'Oui. La cueillette est gratuite, la livraison est facturée selon la distance. Nous desservons Montréal, Laval et la Rive-Nord.', 'accueil' => true],
-            ['q' => 'Puis-je faire inscrire un prénom sur la boîte ?', 'r' => 'Absolument, c’est notre spécialité. Prénom, date, message court : vous choisissez le texte, la police et la couleur.', 'accueil' => true],
-            ['q' => 'Quel est le montant minimum de commande ?', 'r' => 'Aucun minimum pour une pièce unique. Pour les lots d’invités, la commande démarre à 10 unités.', 'accueil' => false],
+            // ── Commander ────────────────────────────────────────────────
+            ['q' => 'Combien de temps à l’avance dois-je commander ?', 'r' => "Idéalement 2 à 3 semaines avant votre événement. Pour les grandes quantités, comptez 4 semaines.\n\nVotre date approche ? Écrivez-nous quand même : nous faisons souvent l'impossible, et nous vous dirons franchement si c'est réalisable.", 'cat' => 'Commander', 'accueil' => true],
+            ['q' => 'Quel est le montant minimum de commande ?', 'r' => 'Aucun minimum pour une pièce unique. Pour les lots d’invités, la commande démarre à 10 unités.', 'cat' => 'Commander', 'accueil' => false],
+            ['q' => 'Comment se passe une commande ?', 'r' => 'Vous décrivez votre projet par le formulaire. Nous revenons sous 24 h avec une proposition et un prix. Une fois validée, nous assemblons votre création et vous envoyons une photo avant la livraison.', 'cat' => 'Commander', 'accueil' => false],
+            ['q' => 'Puis-je modifier ma commande après l’avoir validée ?', 'r' => "Tant que l'assemblage n'a pas commencé, oui, sans frais. Passé ce stade, cela dépend de la modification — écrivez-nous, nous trouverons une solution.", 'cat' => 'Commander', 'accueil' => false],
+
+            // ── Personnalisation ─────────────────────────────────────────
+            ['q' => 'Puis-je faire inscrire un prénom sur la boîte ?', 'r' => 'Absolument, c’est notre spécialité. Prénom, date, message court : vous choisissez le texte, la police et la couleur.', 'cat' => 'Personnalisation', 'accueil' => true],
+            ['q' => 'Utilisez-vous des fleurs naturelles ou artificielles ?', 'r' => "Les deux. Les fleurs artificielles haut de gamme se conservent indéfiniment ; les naturelles apportent un parfum et une fraîcheur incomparables mais durent quelques jours.\n\nSi vous hésitez, dites-le-nous : nous vous conseillons selon votre événement.", 'cat' => 'Personnalisation', 'accueil' => true],
+            ['q' => 'Puis-je choisir mes propres couleurs ?', 'r' => "Oui. Envoyez-nous une photo d'inspiration, un code couleur ou simplement le thème de votre événement — nous composons à partir de là.", 'cat' => 'Personnalisation', 'accueil' => false],
+            ['q' => 'Puis-je m’inspirer d’une création de la galerie ?', 'r' => 'Bien sûr. Chaque fiche a un bouton « Je veux quelque chose comme ça » qui pré-remplit votre demande. Nous adaptons ensuite les couleurs et le texte.', 'cat' => 'Personnalisation', 'accueil' => false],
+
+            // ── Livraison ────────────────────────────────────────────────
+            ['q' => 'Livrez-vous à Laval et sur la Rive-Nord ?', 'r' => 'Oui. La cueillette est gratuite, la livraison est facturée selon la distance. Nous desservons Montréal, Laval, la Rive-Nord et la Rive-Sud.', 'cat' => 'Livraison', 'accueil' => true],
+            ['q' => 'Puis-je venir chercher ma commande ?', 'r' => "Oui, sur rendez-vous. Nous convenons d'une heure ensemble lorsque votre création est prête.", 'cat' => 'Livraison', 'accueil' => false],
+
+            // ── Prix et paiement ─────────────────────────────────────────
+            ['q' => 'Pourquoi les prix sont-ils indiqués « à partir de » ?', 'r' => 'Chaque création est unique : le prix dépend de la taille, des fleurs choisies, de la personnalisation et de la quantité. Les fourchettes vous donnent un ordre de grandeur, et votre soumission vous donne le prix exact.', 'cat' => 'Prix et paiement', 'accueil' => false],
+            ['q' => 'La soumission est-elle payante ?', 'r' => 'Non, elle est gratuite et sans engagement.', 'cat' => 'Prix et paiement', 'accueil' => false],
         ];
 
         foreach ($faqs as $i => $f) {
             Faq::updateOrCreate(
                 ['question_fr' => $f['q']],
-                ['reponse_fr' => $f['r'], 'sur_accueil' => $f['accueil'], 'ordre' => $i * 10, 'publie' => true],
+                [
+                    'reponse_fr' => $f['r'],
+                    'categorie' => $f['cat'],
+                    'sur_accueil' => $f['accueil'],
+                    'ordre' => $i * 10,
+                    'publie' => true,
+                ],
             );
         }
 
         SiteSetting::ecrire('nom_entreprise', 'Fleora');
-        SiteSetting::ecrire('courriel', 'info@fleora.ca');
-        SiteSetting::ecrire('telephone', '450-000-0000');
-        SiteSetting::ecrire('region', 'Montréal, Laval et Rive-Nord');
+        SiteSetting::ecrire('courriel', config('fleora.contact.courriel'));
+        // Pas de téléphone publié : l'atelier n'accueille pas de public et le
+        // numéro personnel n'a rien à faire sur le site.
+        SiteSetting::ecrire('region', 'Grand Montréal, Laval et Rive-Nord');
         SiteSetting::ecrire('instagram', 'https://instagram.com/fleora');
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Creation;
+use App\Models\Faq;
 use App\Models\Occasion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -84,17 +85,19 @@ class PagesPubliquesTest extends TestCase
     {
         // Une page sans contenu indexée par Google dégrade la qualité perçue
         // du domaine entier. La directive doit partir avec le contenu réel.
-        foreach (['/a-propos', '/contact', '/faq', '/merci'] as $url) {
-            $this->get($url)->assertSee('name="robots" content="noindex', false);
-        }
+        //
+        // /merci reste noindex par nature : une page de confirmation n'a rien
+        // à faire dans les résultats de recherche.
+        $this->get('/merci')->assertSee('name="robots" content="noindex', false);
     }
 
     #[Test]
     public function les_pages_avec_contenu_sont_indexables(): void
     {
-        $this->get('/')->assertDontSee('noindex', false);
-        $this->get('/creations')->assertDontSee('noindex', false);
-        $this->get('/confidentialite')->assertDontSee('noindex', false);
+        foreach (['/', '/creations', '/occasions', '/confidentialite',
+            '/a-propos', '/contact', '/faq'] as $url) {
+            $this->get($url)->assertDontSee('noindex', false);
+        }
     }
 
     #[Test]
@@ -118,6 +121,74 @@ class PagesPubliquesTest extends TestCase
 
         $this->get('/occasions')
             ->assertSee(route('creations', ['occasion' => 'mariage']), false);
+    }
+
+    #[Test]
+    public function la_faq_groupe_les_questions_par_categorie(): void
+    {
+        // Une liste à plat se parcourt mal : on cherche dans un thème précis.
+        Faq::create([
+            'question_fr' => 'Livrez-vous à Laval ?',
+            'reponse_fr' => 'Oui.',
+            'categorie' => 'Livraison',
+            'publie' => true,
+        ]);
+
+        $this->get('/faq')
+            ->assertOk()
+            ->assertSee('Livraison')
+            ->assertSee('Livrez-vous à Laval ?');
+    }
+
+    #[Test]
+    public function la_faq_expose_ses_donnees_structurees(): void
+    {
+        // schema.org FAQPage : Google affiche alors les questions en accordéon
+        // directement dans les résultats de recherche.
+        Faq::create([
+            'question_fr' => 'Quel est le délai ?',
+            'reponse_fr' => 'Deux à trois semaines.',
+            'publie' => true,
+        ]);
+
+        $this->get('/faq')
+            ->assertSee('FAQPage', false)
+            ->assertSee('acceptedAnswer', false);
+    }
+
+    #[Test]
+    public function la_faq_masque_les_questions_non_publiees(): void
+    {
+        Faq::create([
+            'question_fr' => 'Brouillon interne',
+            'reponse_fr' => 'Pas prêt.',
+            'publie' => false,
+        ]);
+
+        $this->get('/faq')->assertDontSee('Brouillon interne');
+    }
+
+    #[Test]
+    public function le_contact_ne_publie_ni_telephone_ni_adresse(): void
+    {
+        // Décision explicite : l'atelier n'accueille pas de public, et publier
+        // une adresse personnelle expose le domicile sans rien apporter.
+        $reponse = $this->get('/contact')->assertOk();
+
+        $reponse->assertDontSee('tel:', false);
+        // La carte cadre le Grand Montréal, pas un point d'adresse.
+        $reponse->assertSee('openstreetmap', false);
+    }
+
+    #[Test]
+    public function le_bouton_whatsapp_n_apparait_que_si_un_numero_est_configure(): void
+    {
+        // Un bouton menant à un numéro inexistant est pire que pas de bouton.
+        config(['fleora.contact.whatsapp' => '']);
+        $this->get('/contact')->assertDontSee('wa.me', false);
+
+        config(['fleora.contact.whatsapp' => '+1 514 555 1234']);
+        $this->get('/contact')->assertSee('wa.me/15145551234', false);
     }
 
     #[Test]
