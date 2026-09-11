@@ -38,6 +38,13 @@ class OccasionForm
                                     ->label('Introduction')
                                     ->rows(3)
                                     ->helperText('Court paragraphe affiché en haut de la page.'),
+                                TextInput::make('cta_fr')
+                                    ->label('Libellé du bouton')
+                                    ->maxLength(60)
+                                    ->placeholder('Créer pour mon mariage')
+                                    ->helperText('Reprend les mots de la visiteuse : « Créer pour mon mariage » '
+                                        .'convertit mieux qu’un bouton générique. Laisser vide pour utiliser « '
+                                        .__('commun.cta.soumission').' ».'),
                                 Textarea::make('contenu_seo_fr')
                                     ->label('Contenu détaillé')
                                     ->rows(8)
@@ -59,6 +66,10 @@ class OccasionForm
                                     ->label('Slug (URL)')
                                     ->unique(ignoreRecord: true),
                                 Textarea::make('intro_en')->label('Introduction')->rows(3),
+                                TextInput::make('cta_en')
+                                    ->label('Button label')
+                                    ->maxLength(60)
+                                    ->placeholder('Create for my wedding'),
                                 Textarea::make('contenu_seo_en')->label('Detailed content')->rows(8),
                                 TextInput::make('meta_title_en')->label('Google title')->maxLength(60),
                                 Textarea::make('meta_description_en')->label('Google description')->rows(2)->maxLength(160),

@@ -77,8 +77,12 @@
                 {{ __('pages.occasion.cta_texte') }}
             </p>
             <div class="mt-8">
+                {{-- Libellé propre à l'occasion quand il est renseigné :
+                     « Créer pour mon mariage » confirme à la visiteuse
+                     qu'elle est au bon endroit, là où un bouton générique la
+                     laisse douter. Repli sur le CTA commun sinon. --}}
                 <x-ui.bouton :href="route_langue('demande', ['occasion' => $occasion->slugPour()])">
-                    {{ __('commun.cta.soumission') }}
+                    {{ $occasion->t('cta') ?: __('commun.cta.soumission') }}
                 </x-ui.bouton>
             </div>
         </div>
