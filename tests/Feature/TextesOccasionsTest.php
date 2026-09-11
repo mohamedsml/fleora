@@ -31,6 +31,26 @@ class TextesOccasionsTest extends TestCase
     }
 
     #[Test]
+    public function le_bouton_apparait_des_l_en_tete_et_en_bas_de_page(): void
+    {
+        // Sur la page mariage, huit créations séparaient l'arrivée du seul
+        // bouton : une visiteuse déjà décidée devait faire défiler toute la
+        // page pour agir, là où l'intention d'achat est la plus forte.
+        Occasion::create([
+            'nom_fr' => 'Mariage', 'slug_fr' => 'mariage',
+            'cta_fr' => 'Créer pour mon mariage', 'publie' => true,
+        ]);
+
+        $contenu = $this->get('/occasions/mariage')->assertOk()->getContent();
+
+        $this->assertSame(
+            2,
+            substr_count($contenu, 'Créer pour mon mariage'),
+            'Le bouton doit apparaître en en-tête ET en bas de page.'
+        );
+    }
+
+    #[Test]
     public function sans_libelle_la_page_retombe_sur_le_bouton_generique(): void
     {
         // Une occasion ajoutée dans /admin sans libellé ne doit pas afficher

@@ -40,6 +40,18 @@
             @if ($intro)
                 <p class="mt-6 text-lg leading-relaxed text-ink-600">{{ $intro }}</p>
             @endif
+
+            {{-- Appel à l'action dès l'en-tête, en plus de celui du bas.
+                 Sur la page mariage, huit créations séparaient l'arrivée du
+                 seul bouton : une visiteuse déjà décidée devait faire défiler
+                 toute la page pour agir, alors que c'est ici que l'intention
+                 d'achat est la plus forte. --}}
+            <div class="mt-8 flex flex-wrap items-center gap-4">
+                <x-ui.bouton :href="route_langue('demande', ['occasion' => $occasion->slugPour()])">
+                    {{ $occasion->t('cta') ?: __('commun.cta.soumission') }}
+                </x-ui.bouton>
+                <span class="text-sm text-ink-400">{{ __('pages.occasion.reassurance') }}</span>
+            </div>
         </header>
 
         @if ($creations->isNotEmpty())

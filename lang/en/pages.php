@@ -25,6 +25,7 @@ return [
         'retour' => 'All occasions',
         'vide' => 'Creations for this occasion are coming soon.',
         'voir_toutes' => 'View all :total creations',
+        'reassurance' => 'Reply within 24 hours · No obligation',
         'cta_titre' => 'A creation for your :occasion',
         'cta_texte' => 'Tell us your colours, the name to inscribe and your date — we reply within 24 hours.',
     ],

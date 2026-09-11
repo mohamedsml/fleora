@@ -25,6 +25,9 @@ return [
         'retour' => 'Toutes les occasions',
         'vide' => 'Les créations pour cette occasion arrivent bientôt.',
         'voir_toutes' => 'Voir les :total créations',
+        // Affichée à côté du bouton d'en-tête : lève les deux objections
+        // qui retiennent avant de remplir un formulaire.
+        'reassurance' => 'Réponse sous 24 h · Sans engagement',
         'cta_titre' => 'Une création pour votre :occasion',
         'cta_texte' => 'Dites-nous vos couleurs, le prénom à inscrire et votre date — nous vous répondons sous 24 h.',
     ],
