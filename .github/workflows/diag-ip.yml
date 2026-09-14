@@ -1,0 +1,30 @@
+name: Diagnostic IP visiteur
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Quelle IP le serveur voit-il ?
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            echo "--- dernières visites : empreintes distinctes ---"
+            /opt/alt/php83/usr/bin/php -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+              printf("visites totales : %d\n", App\Models\Visite::count());
+              printf("empreintes distinctes aujourd’hui : %d\n",
+                App\Models\Visite::whereDate("created_at", today())->distinct("empreinte")->count("empreinte"));
+            '
+            echo "--- en-têtes de proxy reçus par Apache (dernière requête loguée) ---"
+            grep -oiE "X-Forwarded-For|CF-Connecting-IP|X-Real-IP" ~/.logs/*.log 2>/dev/null | sort -u | head -5 || echo "(journaux non lisibles)"
