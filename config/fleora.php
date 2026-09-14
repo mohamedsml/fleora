@@ -133,6 +133,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Adresses IP exclues des statistiques
+    |--------------------------------------------------------------------------
+    |
+    | Les visites venant de ces adresses ne sont ni enregistrées, ni envoyées à
+    | Google Analytics. Sans cela, vérifier une page après chaque modification
+    | gonfle les chiffres — sur un site jeune, les visites du propriétaire
+    | dépassent vite celles des vraies clientes.
+    |
+    | Plusieurs adresses se séparent par des virgules dans le .env.
+    |
+    | ⚠️ Une adresse résidentielle change périodiquement : si les chiffres
+    | remontent sans raison, c'est la première chose à vérifier.
+    |
+    */
+
+    'ips_exclues' => array_filter(array_map(
+        'trim',
+        explode(',', (string) env('FLEORA_IPS_EXCLUES', '')),
+    )),
+
+    /*
+    |--------------------------------------------------------------------------
     | Compte d'administration recréé par les seeds (développement)
     |--------------------------------------------------------------------------
     |

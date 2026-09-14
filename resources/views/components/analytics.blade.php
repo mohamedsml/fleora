@@ -14,7 +14,11 @@
 --}}
 @php($mesure = config('services.google_analytics.id'))
 
-@if ($mesure)
+{{-- Les adresses exclues ne chargent pas le tag : sans cela, vérifier une
+     page après chaque modification gonflerait les chiffres de Google, que
+     l'on ne peut plus corriger après coup. La même liste sert au comptage
+     interne — voir EnregistrerVisite::ipExclue(). --}}
+@if ($mesure && ! \App\Http\Middleware\EnregistrerVisite::ipExclue(request()->ip()))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ $mesure }}"></script>
     <script>
         window.dataLayer = window.dataLayer || [];

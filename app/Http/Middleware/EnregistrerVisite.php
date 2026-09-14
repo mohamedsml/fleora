@@ -82,7 +82,27 @@ class EnregistrerVisite
             return false;
         }
 
+        if (static::ipExclue($request->ip())) {
+            return false;
+        }
+
         return ! $this->estUnRobot($request);
+    }
+
+    /**
+     * Adresse dont les visites ne doivent pas être comptées.
+     *
+     * Publique et statique : le composant Analytics s'en sert aussi, pour que
+     * le tag de Google ne se charge pas non plus. Une seule règle vaut mieux
+     * que deux listes qui divergeraient.
+     */
+    public static function ipExclue(?string $ip): bool
+    {
+        if (blank($ip)) {
+            return false;
+        }
+
+        return in_array($ip, config('fleora.ips_exclues', []), true);
     }
 
     /**
