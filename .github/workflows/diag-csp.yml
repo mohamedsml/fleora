@@ -1,0 +1,35 @@
+name: Diagnostic CSP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: D'où vient l'en-tête CSP ?
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            echo "--- .htaccess du projet ---"
+            grep -in "content-security\|upgrade-insecure\|Header" public/.htaccess 2>/dev/null | head -10 || echo "(rien)"
+            echo "--- .htaccess à la racine du domaine ---"
+            grep -in "content-security\|upgrade-insecure\|Header" ~/domains/fleora.ca/public_html/.htaccess 2>/dev/null | head -10 || echo "(rien ou symlink)"
+            echo "--- .htaccess du home ---"
+            grep -in "content-security\|upgrade-insecure" ~/.htaccess 2>/dev/null | head -5 || echo "(rien)"
+            echo "--- le middleware pose-t-il bien l'en-tête ? ---"
+            /opt/alt/php83/usr/bin/php -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $k = $a->make(Illuminate\Contracts\Http\Kernel::class);
+              $r = $k->handle(Illuminate\Http\Request::create("https://fleora.ca/", "GET"));
+              $csp = $r->headers->get("Content-Security-Policy");
+              echo "longueur : ", strlen((string) $csp), PHP_EOL;
+              echo substr((string) $csp, 0, 160), PHP_EOL;
+            '
