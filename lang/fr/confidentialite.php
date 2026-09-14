@@ -58,7 +58,11 @@ return [
 
     'temoins' => [
         'titre' => 'Témoins (cookies)',
-        'texte' => 'Ce site n’utilise aucun témoin publicitaire ni de suivi. Seul un témoin technique est déposé pour faire fonctionner les formulaires en toute sécurité ; il ne permet pas de vous identifier et disparaît à la fermeture de votre navigateur.',
+        'texte' => 'Un témoin technique est déposé pour faire fonctionner les formulaires en toute sécurité ; il ne permet pas de vous identifier et disparaît à la fermeture de votre navigateur.',
+        'analytics_titre' => 'Mesure d’audience',
+        'analytics' => 'Nous utilisons Google Analytics pour comprendre comment le site est consulté : pages vues, provenance des visites, type d’appareil. Cet outil dépose des témoins (« _ga » et « _ga_… ») conservés jusqu’à deux ans, et transmet des données à Google LLC, aux États-Unis. Votre adresse IP y est tronquée avant enregistrement.',
+        'analytics_refus' => 'Vous pouvez refuser cette mesure en installant le module complémentaire de désactivation publié par Google, ou en activant le signal « Do Not Track » ou le blocage des témoins tiers dans votre navigateur.',
+        'analytics_lien' => 'https://tools.google.com/dlpage/gaoptout?hl=fr',
     ],
 
     'droits' => [

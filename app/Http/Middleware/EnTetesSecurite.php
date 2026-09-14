@@ -83,17 +83,26 @@ class EnTetesSecurite
             "default-src 'self'",
 
             // 'unsafe-eval' : Alpine compile ses expressions à l'exécution.
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+            // googletagmanager.com sert le script de Google Analytics.
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com "
+                .'https://www.googletagmanager.com',
 
             "style-src 'self' 'unsafe-inline'",
 
             // data: pour les images en ligne ; blob: pour les aperçus de
             // fichiers avant envoi dans le formulaire.
-            "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
+            // Google Analytics envoie certaines mesures via une image
+            // d'un pixel quand la requête réseau est bloquée.
+            "img-src 'self' data: blob: https://*.tile.openstreetmap.org "
+                .'https://www.google-analytics.com https://*.google-analytics.com',
 
             "font-src 'self' data:",
 
-            "connect-src 'self'",
+            // Sans ces domaines, le script se charge mais n'envoie rien :
+            // la panne serait silencieuse.
+            "connect-src 'self' https://www.google-analytics.com "
+                .'https://*.google-analytics.com https://*.analytics.google.com '
+                .'https://www.googletagmanager.com',
 
             // Turnstile et la carte de contact s'affichent dans des cadres.
             'frame-src https://challenges.cloudflare.com https://www.openstreetmap.org',

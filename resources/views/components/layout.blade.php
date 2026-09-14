@@ -99,6 +99,11 @@
     {{-- Données structurées : permet à Google d'afficher les coordonnées et
          la zone desservie directement dans les résultats de recherche. --}}
     {{ $schema ?? '' }}
+
+    {{-- Ce layout ne sert que le site public : l'administration a le sien.
+         Les passages dans /admin ne sont donc jamais comptés, ce qui
+         fausserait les chiffres de fréquentation. --}}
+    <x-analytics />
 </head>
 <body class="bg-ivory-50 text-ink-800 antialiased">
     {{-- Lien d'évitement : première cible au clavier, il permet de sauter la

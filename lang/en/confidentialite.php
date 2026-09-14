@@ -68,7 +68,11 @@ return [
 
     'temoins' => [
         'titre' => 'Cookies',
-        'texte' => 'This site uses no advertising or tracking cookies. Only a technical cookie is set, to make the forms work securely; it cannot identify you and disappears when you close your browser.',
+        'texte' => 'A technical cookie is set to make the forms work securely; it cannot identify you and disappears when you close your browser.',
+        'analytics_titre' => 'Audience measurement',
+        'analytics' => 'We use Google Analytics to understand how the site is used: pages viewed, where visits come from, device type. This tool sets cookies (“_ga” and “_ga_…”) kept for up to two years, and transmits data to Google LLC in the United States. Your IP address is truncated before it is recorded.',
+        'analytics_refus' => 'You can opt out by installing the browser add-on published by Google, or by enabling the “Do Not Track” signal or third-party cookie blocking in your browser.',
+        'analytics_lien' => 'https://tools.google.com/dlpage/gaoptout',
     ],
 
     'droits' => [

@@ -59,4 +59,23 @@ return [
         'secret' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google Analytics 4
+    |--------------------------------------------------------------------------
+    |
+    | Identifiant de mesure, de la forme « G-XXXXXXXXXX ». Laissé vide, le
+    | script ne s'affiche pas : c'est ce qui évite d'envoyer les visites des
+    | environnements locaux et de test dans les statistiques réelles.
+    |
+    | ⚠️ GA dépose les témoins `_ga` et `_ga_*`, conservés deux ans. La
+    | politique de confidentialité doit le mentionner — voir la section
+    | « Témoins » de lang/{fr,en}/confidentialite.php.
+    |
+    */
+
+    'google_analytics' => [
+        'id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
 ];

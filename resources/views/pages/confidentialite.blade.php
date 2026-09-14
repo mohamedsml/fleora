@@ -80,6 +80,24 @@
             <section>
                 <h2 class="font-display text-2xl text-ink-900">{{ __('confidentialite.temoins.titre') }}</h2>
                 <p class="mt-4">{{ __('confidentialite.temoins.texte') }}</p>
+
+                {{-- Mesure d'audience : annoncée seulement quand elle est
+                     réellement active. Un texte parlant de Google Analytics
+                     sur un site qui ne l'a pas serait faux dans l'autre sens. --}}
+                @if (config('services.google_analytics.id'))
+                    <h3 class="mt-8 font-display text-xl text-ink-900">
+                        {{ __('confidentialite.temoins.analytics_titre') }}
+                    </h3>
+                    <p class="mt-4">{{ __('confidentialite.temoins.analytics') }}</p>
+                    <p class="mt-4">
+                        {{ __('confidentialite.temoins.analytics_refus') }}
+                        <a href="{{ __('confidentialite.temoins.analytics_lien') }}"
+                           class="underline decoration-blush-300 underline-offset-4 hover:text-blush-700"
+                           rel="noopener nofollow" target="_blank">
+                            tools.google.com/dlpage/gaoptout
+                        </a>
+                    </p>
+                @endif
             </section>
 
             <section>
