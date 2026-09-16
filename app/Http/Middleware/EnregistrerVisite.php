@@ -6,6 +6,7 @@ use App\Models\Visite;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -86,7 +87,37 @@ class EnregistrerVisite
             return false;
         }
 
-        return ! $this->estUnRobot($request);
+        if ($this->estUnRobot($request)) {
+            return false;
+        }
+
+        return ! $this->cadenceAnormale($request);
+    }
+
+    /**
+     * Rythme de consultation qu'aucune personne ne produit.
+     *
+     * La détection par nom d'agent ne voit que les robots qui s'annoncent.
+     * Deux balayages ont ainsi enregistré 141 pages en 90 secondes chacun,
+     * en se présentant comme un navigateur ordinaire — soit 282 des 369
+     * visites d'une seule journée.
+     *
+     * Le compteur vit en cache et non en base : interroger la table à chaque
+     * requête coûterait plus cher que la mesure elle-même.
+     */
+    private function cadenceAnormale(Request $request): bool
+    {
+        $cle = 'visites:cadence:'.sha1((string) $request->ip());
+
+        $vues = Cache::get($cle, 0) + 1;
+
+        // Une minute de fenêtre : assez pour repérer un balayage, trop court
+        // pour qu'une lecture attentive du catalogue déclenche le seuil.
+        Cache::put($cle, $vues, now()->addMinute());
+
+        // Trente pages par minute. Une visiteuse pressée en ouvre une dizaine ;
+        // au-delà, c'est un script.
+        return $vues > 30;
     }
 
     /**
