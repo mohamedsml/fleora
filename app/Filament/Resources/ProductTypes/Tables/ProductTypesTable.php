@@ -29,7 +29,7 @@ class ProductTypesTable
             ])
             ->defaultSort('ordre')
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

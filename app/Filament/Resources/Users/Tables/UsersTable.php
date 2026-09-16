@@ -54,11 +54,11 @@ class UsersTable
                     ->falseLabel('Désactivés'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make()
-                    // Deux suppressions à rendre impossibles : la sienne, qui
-                    // déconnecte immédiatement, et celle du dernier compte
-                    // actif, qui fermerait l'administration pour de bon.
+                EditAction::make()->iconButton(),
+                // Deux suppressions à rendre impossibles : la sienne, qui
+                // déconnecte immédiatement, et celle du dernier compte actif,
+                // qui fermerait l'administration pour de bon.
+                DeleteAction::make()->iconButton()
                     ->hidden(fn (User $record) => $record->is(auth()->user()) || static::estLeDernierActif($record)),
             ])
             ->toolbarActions([

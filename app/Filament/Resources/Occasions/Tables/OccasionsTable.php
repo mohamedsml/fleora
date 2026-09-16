@@ -55,7 +55,7 @@ class OccasionsTable
                 TernaryFilter::make('publie')->label('Publiée'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

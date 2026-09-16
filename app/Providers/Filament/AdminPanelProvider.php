@@ -14,6 +14,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -109,6 +110,14 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            // Filament borne le contenu à 7xl (80rem) par défaut : sur un
+            // écran large, cela laissait une bande vide entre le menu et la
+            // table, qui devait alors défiler horizontalement pour montrer
+            // ses actions.
+            ->maxContentWidth(Width::Full)
+            // Le menu se replie en icônes : la liste des demandes gagne
+            // 14 rem quand on travaille dedans, et se redéploie d'un clic.
+            ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

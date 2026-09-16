@@ -8,7 +8,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -60,7 +59,9 @@ class CustomRequestsTable
                     ->label('Budget')
                     ->formatStateUsing(fn (?string $state) => $state ? __('demande.budgets.'.$state) : null)
                     ->placeholder('—')
-                    ->toggleable(),
+                    // Replié par défaut : utile à l'ouverture d'une fiche, pas
+                    // pour décider quelle demande traiter en premier.
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('quantite')
                     ->label('Qté')
@@ -71,13 +72,13 @@ class CustomRequestsTable
                 TextColumn::make('statut')
                     ->label('Statut')
                     ->badge()
-                    ->sortable(),
-
-                IconColumn::make('repondu_le')
-                    ->label('Répondu')
-                    ->boolean()
-                    ->getStateUsing(fn (CustomRequest $record) => $record->repondu_le !== null)
-                    ->tooltip(fn (CustomRequest $record) => $record->repondu_le?->diffForHumans()),
+                    ->sortable()
+                    // L'état de réponse occupait sa propre colonne alors qu'il
+                    // complète le statut : « Nouvelle » sans réponse depuis
+                    // deux jours ne se lit pas comme « Nouvelle » d'hier.
+                    ->description(fn (CustomRequest $record) => $record->repondu_le
+                        ? 'Répondu '.$record->repondu_le->diffForHumans(['short' => true])
+                        : 'Sans réponse'),
 
                 TextColumn::make('created_at')
                     ->label('Reçue')
@@ -117,9 +118,13 @@ class CustomRequestsTable
                     ->query(fn (Builder $query) => $query->has('attachments'))
                     ->toggle(),
             ])
+            // Icônes seules : neuf colonnes poussaient les actions hors de
+            // l'écran, et il fallait défiler horizontalement pour les
+            // atteindre. Le libellé reste accessible en infobulle et aux
+            // lecteurs d'écran.
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()->iconButton(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

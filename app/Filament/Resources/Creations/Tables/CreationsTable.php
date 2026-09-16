@@ -76,7 +76,7 @@ class CreationsTable
                 TernaryFilter::make('vedette')->label('Vedette'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
