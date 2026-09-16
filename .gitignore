@@ -12,7 +12,11 @@ auth.json
 # ─── Dépendances (réinstallables) ────────────────────────────────────────
 # Reconstruites par `composer install` / `npm install` à partir des fichiers
 # de verrouillage, qui eux SONT versionnés.
-vendor/
+#
+# La barre oblique initiale limite la règle à la racine : sans elle, elle
+# attrapait aussi lang/vendor/, où vivent les traductions publiées des
+# paquets. Celles-ci sont du code à nous, pas une dépendance réinstallable.
+/vendor/
 node_modules/
 
 # ─── Build et compilation ────────────────────────────────────────────────
