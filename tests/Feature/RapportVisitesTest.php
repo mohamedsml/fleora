@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Enums\StatutDemande;
 use App\Filament\Pages\RapportVisites;
+use App\Filament\Widgets\CourbeVisites;
 use App\Filament\Widgets\DemandesEnCours;
+use App\Filament\Widgets\RepartitionVisites;
+use App\Filament\Widgets\ResumeFrequentation;
 use App\Models\CustomRequest;
 use App\Models\User;
 use App\Models\Visite;
@@ -17,9 +20,10 @@ use Tests\TestCase;
 /**
  * Rapport de fréquentation détaillé.
  *
- * Le tableau de bord garde la synthèse ; cette page répond aux questions qui
- * demandent de creuser — par où les visiteuses arrivent, ce qu'elles
- * consultent, où elles s'arrêtent.
+ * Tout passe par des widgets Filament : le panneau sert un CSS précompilé qui
+ * ne contient que les classes de ses propres composants, et une version
+ * antérieure écrivait ses classes Tailwind à la main — elles n'étaient jamais
+ * générées, et la page s'affichait en texte brut.
  */
 class RapportVisitesTest extends TestCase
 {
@@ -30,6 +34,7 @@ class RapportVisitesTest extends TestCase
         parent::setUp();
 
         $this->actingAs(User::factory()->create(['actif' => true]));
+        Filament::setCurrentPanel('admin');
     }
 
     private function visite(array $attributs = []): Visite
@@ -42,6 +47,8 @@ class RapportVisitesTest extends TestCase
         ]);
     }
 
+    // ── Page ────────────────────────────────────────────────────────────
+
     #[Test]
     public function la_page_est_accessible(): void
     {
@@ -49,31 +56,68 @@ class RapportVisitesTest extends TestCase
     }
 
     #[Test]
-    public function la_page_affiche_les_chiffres_cles(): void
+    public function la_page_porte_le_filtre_de_periode(): void
+    {
+        $this->get('/admin/rapport-visites')
+            ->assertOk()
+            ->assertSee('Période analysée')
+            ->assertSee('Exporter en CSV');
+    }
+
+    // ── Widgets ─────────────────────────────────────────────────────────
+
+    #[Test]
+    public function les_chiffres_cles_s_affichent(): void
     {
         $this->visite();
 
-        Livewire::test(RapportVisites::class)
+        Livewire::test(ResumeFrequentation::class, ['pageFilters' => ['periode' => 30]])
             ->assertSee('Visites')
             ->assertSee('Pages par visiteur')
             ->assertSee('Conversion');
     }
 
     #[Test]
-    public function la_periode_filtre_les_donnees(): void
+    public function la_courbe_se_rend(): void
     {
-        $this->visite(['chemin' => '/recent']);
+        $this->visite();
+
+        Livewire::test(CourbeVisites::class, ['pageFilters' => ['periode' => 30]])
+            ->assertSee('Évolution des visites');
+    }
+
+    #[Test]
+    public function les_repartitions_se_rendent(): void
+    {
+        $this->visite(['chemin' => '/creations', 'source' => 'instagram.com']);
+
+        Livewire::test(RepartitionVisites::class, ['pageFilters' => ['periode' => 30]])
+            ->assertSee('Pages d’entrée')
+            ->assertSee('Sources')
+            ->assertSee('instagram.com');
+    }
+
+    #[Test]
+    public function le_filtre_de_periode_atteint_les_widgets(): void
+    {
+        // Sans transmission du filtre, la page afficherait toujours trente
+        // jours quelle que soit la sélection.
+        $this->visite(['chemin' => '/recente']);
         $this->visite([
-            'chemin' => '/ancien',
+            'chemin' => '/ancienne',
             'empreinte' => str_repeat('b', 64),
-            'created_at' => now()->subDays(60),
+            'created_at' => now()->subDays(40),
         ]);
 
-        Livewire::test(RapportVisites::class)
-            ->set('periode', 7)
-            ->assertSee('/recent')
-            ->assertDontSee('/ancien');
+        Livewire::test(RepartitionVisites::class, ['pageFilters' => ['periode' => 7]])
+            ->assertSee('/recente')
+            ->assertDontSee('/ancienne');
+
+        Livewire::test(RepartitionVisites::class, ['pageFilters' => ['periode' => 90]])
+            ->assertSee('/ancienne');
     }
+
+    // ── Calculs ─────────────────────────────────────────────────────────
 
     #[Test]
     public function les_pages_d_entree_retiennent_la_premiere_vue(): void
@@ -83,30 +127,15 @@ class RapportVisitesTest extends TestCase
         $this->visite(['chemin' => '/creations/eclat-de-roses']);
         $this->visite(['chemin' => '/']);
 
-        $entrees = Visite::pagesEntree(now()->subDays(30), now());
-
-        $this->assertSame(['/creations/eclat-de-roses' => 1], $entrees);
-    }
-
-    #[Test]
-    public function la_courbe_comble_les_jours_sans_visite(): void
-    {
-        // Une courbe qui saute les creux ment sur la régularité du trafic.
-        $this->visite(['created_at' => now()->subDays(5)]);
-
-        $serie = Livewire::test(RapportVisites::class)
-            ->set('periode', 7)
-            ->instance()
-            ->evolutionQuotidienne();
-
-        $this->assertGreaterThanOrEqual(7, count($serie));
-        $this->assertContains(0, $serie, 'Les jours vides doivent valoir zéro.');
+        $this->assertSame(
+            ['/creations/eclat-de-roses' => 1],
+            Visite::pagesEntree(now()->subDays(30), now()),
+        );
     }
 
     #[Test]
     public function la_profondeur_signale_les_visiteurs_d_une_seule_page(): void
     {
-        // Deux pages pour la première empreinte, une seule pour la seconde.
         $this->visite(['chemin' => '/']);
         $this->visite(['chemin' => '/creations']);
         $this->visite(['chemin' => '/', 'empreinte' => str_repeat('c', 64)]);
@@ -119,15 +148,30 @@ class RapportVisitesTest extends TestCase
     }
 
     #[Test]
+    public function la_courbe_comble_les_jours_sans_visite(): void
+    {
+        // Une courbe qui saute les creux ment sur la régularité du trafic.
+        $this->visite(['created_at' => now()->subDays(5)]);
+
+        $serie = Visite::parJour(now()->subDays(7)->startOfDay(), now());
+
+        // Le modèle ne renvoie que les jours peuplés ; c'est le widget qui
+        // comble — on vérifie ici que la donnée brute est bien datée.
+        $this->assertArrayHasKey(now()->subDays(5)->format('Y-m-d'), $serie);
+    }
+
+    // ── Export ──────────────────────────────────────────────────────────
+
+    #[Test]
     public function l_export_csv_contient_les_visites(): void
     {
         $this->visite(['chemin' => '/creations', 'source' => 'instagram.com']);
 
-        $reponse = (new RapportVisites)->exporter();
+        $page = new RapportVisites;
+        $page->filters = ['periode' => 30];
 
-        // Le contenu est produit en flux : on le capture pour le vérifier.
         ob_start();
-        $reponse->sendContent();
+        $page->exporter()->sendContent();
         $csv = ob_get_clean();
 
         $this->assertStringContainsString('/creations', $csv);
@@ -137,6 +181,8 @@ class RapportVisitesTest extends TestCase
         // BOM UTF-8 : sans lui, Excel affiche « Ã© » à la place des accents.
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
     }
+
+    // ── Tableau de bord ─────────────────────────────────────────────────
 
     #[Test]
     public function le_tableau_de_bord_montre_les_demandes(): void
@@ -153,16 +199,18 @@ class RapportVisitesTest extends TestCase
     }
 
     #[Test]
-    public function le_tableau_de_bord_ne_porte_plus_le_detail_des_visites(): void
+    public function les_widgets_du_rapport_ne_sont_pas_sur_le_tableau_de_bord(): void
     {
-        // Le détail vit sur la page dédiée, où il se filtre par période.
+        // Ils lisent le filtre de période de leur page : posés ailleurs, ils
+        // afficheraient toujours trente jours.
         $widgets = array_map(
             fn ($w) => class_basename($w),
             Filament::getPanel('admin')->getWidgets(),
         );
 
         $this->assertContains('DemandesEnCours', $widgets);
-        $this->assertNotContains('PagesLesPlusVues', $widgets);
-        $this->assertNotContains('SourcesDeTrafic', $widgets);
+        $this->assertNotContains('ResumeFrequentation', $widgets);
+        $this->assertNotContains('CourbeVisites', $widgets);
+        $this->assertNotContains('RepartitionVisites', $widgets);
     }
 }

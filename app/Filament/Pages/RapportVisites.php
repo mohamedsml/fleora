@@ -2,29 +2,36 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\CustomRequest;
+use App\Filament\Widgets\CourbeVisites;
+use App\Filament\Widgets\RepartitionVisites;
+use App\Filament\Widgets\ResumeFrequentation;
 use App\Models\Visite;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Rapport de fréquentation détaillé.
  *
- * Le tableau de bord garde la synthèse — quatre chiffres et les demandes en
- * cours. Cette page répond aux questions qui demandent de creuser : par où
- * les visiteuses arrivent, ce qu'elles consultent ensuite, et quelles pages
- * les laissent repartir.
+ * Le tableau de bord garde la synthèse — demandes en cours et quatre chiffres.
+ * Cette page répond aux questions qui demandent de creuser : par où les
+ * visiteuses arrivent, ce qu'elles consultent, où elles s'arrêtent.
  *
- * Les calculs vivent dans le modèle Visite : une page Filament qui porte ses
- * propres requêtes devient vite illisible, et les mêmes chiffres seraient
- * recalculés différemment ailleurs.
+ * Tout passe par des widgets Filament plutôt que par du balisage écrit à la
+ * main. Le panneau sert un CSS précompilé qui ne contient que les classes de
+ * ses propres composants : des classes Tailwind ajoutées dans une vue ne sont
+ * jamais générées, et la page s'affichait sans aucun style.
  */
 class RapportVisites extends Page
 {
+    use HasFiltersForm;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
     protected static string|null|\UnitEnum $navigationGroup = 'Système';
@@ -37,126 +44,46 @@ class RapportVisites extends Page
 
     protected string $view = 'filament.pages.rapport-visites';
 
-    /** Nombre de jours analysés. Les valeurs proposées couvrent les usages réels. */
-    public int $periode = 30;
-
-    /** @var array<int, string> */
-    public array $periodes = [
-        7 => '7 derniers jours',
-        30 => '30 derniers jours',
-        90 => '3 derniers mois',
-        365 => '12 derniers mois',
-    ];
-
-    public function debut(): Carbon
+    public function filtersForm(Schema $schema): Schema
     {
-        return now()->subDays($this->periode)->startOfDay();
+        return $schema->components([
+            Select::make('periode')
+                ->label('Période analysée')
+                ->options([
+                    7 => '7 derniers jours',
+                    30 => '30 derniers jours',
+                    90 => '3 derniers mois',
+                    365 => '12 derniers mois',
+                ])
+                ->default(30)
+                ->selectablePlaceholder(false)
+                ->native(false),
+        ]);
     }
 
-    /**
-     * Chiffres d'en-tête, comparés à la période précédente de même durée.
-     *
-     * @return array<string, array{valeur: string, evolution: ?float, aide: string}>
-     */
-    public function resume(): array
+    protected function getHeaderActions(): array
     {
-        $debut = $this->debut();
-        $precedent = now()->subDays($this->periode * 2)->startOfDay();
-
-        $visites = Visite::query()->entre($debut, now())->count();
-        $visitesAvant = Visite::query()->entre($precedent, $debut)->count();
-
-        $profondeur = Visite::profondeur($debut, now());
-        $demandes = CustomRequest::whereBetween('created_at', [$debut, now()])->count();
-
         return [
-            'Visites' => [
-                'valeur' => number_format($visites, 0, ',', ' '),
-                'evolution' => $this->evolution($visites, $visitesAvant),
-                'aide' => 'Pages vues sur la période',
-            ],
-            'Visiteurs' => [
-                'valeur' => number_format($profondeur['visiteurs'], 0, ',', ' '),
-                'evolution' => null,
-                'aide' => 'Distincts par jour',
-            ],
-            'Pages par visiteur' => [
-                'valeur' => (string) $profondeur['pages_par_visiteur'],
-                'evolution' => null,
-                // Sous 2, les visiteuses repartent après la première page.
-                'aide' => $profondeur['pages_par_visiteur'] < 2
-                    ? 'Faible — la page d’entrée retient peu'
-                    : 'Bon signe d’intérêt',
-            ],
-            'Une seule page' => [
-                'valeur' => $profondeur['une_seule_page'].' %',
-                'evolution' => null,
-                'aide' => 'Reparties sans aller plus loin',
-            ],
-            'Demandes' => [
-                'valeur' => (string) $demandes,
-                'evolution' => null,
-                'aide' => 'Formulaires envoyés',
-            ],
-            'Conversion' => [
-                'valeur' => $profondeur['visiteurs'] > 0
-                    ? round($demandes / $profondeur['visiteurs'] * 100, 1).' %'
-                    : '—',
-                'evolution' => null,
-                'aide' => 'Cible : 2 à 4 %',
-            ],
+            Action::make('exporter')
+                ->label('Exporter en CSV')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action('exporter'),
         ];
     }
 
-    /**
-     * Courbe des visites, un point par jour.
-     *
-     * Les jours sans visite valent zéro plutôt que d'être absents : une courbe
-     * qui saute les creux ment sur la régularité du trafic.
-     *
-     * @return array<string, int>
-     */
-    public function evolutionQuotidienne(): array
+    public function getWidgets(): array
     {
-        $brut = Visite::parJour($this->debut(), now());
-        $serie = [];
-
-        for ($jour = $this->debut()->copy(); $jour <= now(); $jour->addDay()) {
-            $cle = $jour->format('Y-m-d');
-            $serie[$cle] = $brut[$cle] ?? 0;
-        }
-
-        return $serie;
+        return [
+            ResumeFrequentation::class,
+            CourbeVisites::class,
+            RepartitionVisites::class,
+        ];
     }
 
-    /** @return array<string, int> */
-    public function pagesEntree(): array
+    public function getColumns(): int|array
     {
-        return Visite::pagesEntree($this->debut(), now());
-    }
-
-    /** @return array<string, int> */
-    public function pagesVues(): array
-    {
-        return Visite::repartition('chemin', $this->debut(), now(), 15);
-    }
-
-    /** @return array<string, int> */
-    public function sources(): array
-    {
-        return Visite::repartition('source', $this->debut(), now(), 10);
-    }
-
-    /** @return array<string, int> */
-    public function appareils(): array
-    {
-        return Visite::repartition('appareil', $this->debut(), now());
-    }
-
-    /** @return array<string, int> */
-    public function langues(): array
-    {
-        return Visite::repartition('langue', $this->debut(), now());
+        return 1;
     }
 
     /**
@@ -168,7 +95,8 @@ class RapportVisites extends Page
      */
     public function exporter(): StreamedResponse
     {
-        $debut = $this->debut();
+        $jours = (int) ($this->filters['periode'] ?? 30);
+        $debut = now()->subDays($jours)->startOfDay();
         $nom = 'visites-'.$debut->format('Y-m-d').'-au-'.now()->format('Y-m-d').'.csv';
 
         return Response::streamDownload(function () use ($debut) {
@@ -199,14 +127,5 @@ class RapportVisites extends Page
 
             fclose($sortie);
         }, $nom, ['Content-Type' => 'text/csv; charset=UTF-8']);
-    }
-
-    private function evolution(int $actuel, int $precedent): ?float
-    {
-        if ($precedent === 0) {
-            return null;
-        }
-
-        return round(($actuel - $precedent) / $precedent * 100);
     }
 }
