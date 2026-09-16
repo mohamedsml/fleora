@@ -1,0 +1,45 @@
+name: Diagnostic visites
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Répartition des visites par jour et par empreinte
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            /opt/alt/php83/usr/bin/php -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+              printf("total : %d visites%s", App\Models\Visite::count(), PHP_EOL);
+              echo PHP_EOL, "--- par jour ---", PHP_EOL;
+              foreach (App\Models\Visite::selectRaw("DATE(created_at) j, COUNT(*) n, COUNT(DISTINCT empreinte) e")
+                       ->groupBy("j")->orderBy("j")->get() as $r) {
+                printf("%s : %4d visites, %2d empreinte(s)%s", $r->j, $r->n, $r->e, PHP_EOL);
+              }
+
+              echo PHP_EOL, "--- empreintes les plus actives ---", PHP_EOL;
+              foreach (App\Models\Visite::selectRaw("empreinte, COUNT(*) n, MIN(created_at) d, MAX(created_at) f")
+                       ->groupBy("empreinte")->orderByDesc("n")->take(6)->get() as $r) {
+                printf("%s… : %4d visites  du %s au %s%s",
+                  substr($r->empreinte, 0, 10), $r->n,
+                  substr($r->d, 0, 16), substr($r->f, 11, 5), PHP_EOL);
+              }
+
+              echo PHP_EOL, "--- agents : part des outils en ligne de commande ---", PHP_EOL;
+              foreach (App\Models\Visite::selectRaw("appareil, COUNT(*) n")
+                       ->groupBy("appareil")->get() as $r) {
+                printf("%-12s %d%s", $r->appareil, $r->n, PHP_EOL);
+              }
+            '
