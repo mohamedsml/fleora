@@ -1,0 +1,43 @@
+name: Configurer les journaux quotidiens
+
+on:
+  workflow_dispatch:
+
+jobs:
+  configurer:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Activer la rotation quotidienne
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            PHP=/opt/alt/php83/usr/bin/php
+
+            cp .env ".env.sauvegarde-$(date +%Y%m%d-%H%M%S)"
+
+            for ligne in "LOG_STACK=daily" "LOG_DAILY_DAYS=14"; do
+              cle="${ligne%%=*}"
+              if grep -qE "^${cle}=" .env; then
+                sed -i "s|^${cle}=.*|${ligne}|" .env
+              else
+                printf '%s\n' "$ligne" >> .env
+              fi
+            done
+
+            grep -n '^LOG_' .env
+
+            $PHP artisan config:clear >/dev/null
+            $PHP artisan config:cache >/dev/null
+            echo "caches reconstruits"
+
+            echo "--- état des journaux ---"
+            ls -lh storage/logs/*.log 2>/dev/null | tail -5 || echo "(aucun)"
+            du -sh storage/logs 2>/dev/null
