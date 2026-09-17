@@ -10,6 +10,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -24,7 +25,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use RuntimeException;
-use Saade\FilamentLaravelLog\FilamentLaravelLogPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -124,27 +124,19 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->plugins([
-                /*
-                 * Lecteur de logs dans l'administration.
-                 *
-                 * Sur un hébergement mutualisé, diagnostiquer une erreur 500
-                 * demandait une session SSH. Cet écran donne la même
-                 * information depuis le navigateur.
-                 *
-                 * ⚠️ Les logs contiennent des traces d'exception : chemins du
-                 * serveur, extraits de code, parfois des données de requête.
-                 * L'écran hérite de l'authentification du panneau, et
-                 * `authorize` en restreint l'accès au-delà.
-                 */
-                FilamentLaravelLogPlugin::make()
-                    ->navigationGroup('Système')
-                    ->navigationLabel('Journaux')
-                    ->navigationIcon('heroicon-o-document-text')
-                    ->navigationSort(99)
-                    // Réservé aux comptes actifs : un compte désactivé qui
-                    // garderait une session ouverte ne doit pas lire les logs.
-                    ->authorize(fn () => (bool) auth()->user()?->actif),
+            // Le lecteur de journaux vit sur sa propre route, hors du
+            // panneau : sans cette entrée, il faudrait connaître l'URL par
+            // cœur. L'icône ouvre dans un nouvel onglet — on y va pour
+            // diagnostiquer, sans vouloir quitter l'écran en cours.
+            ->navigationItems([
+                NavigationItem::make('Journaux')
+                    ->url(fn (): string => route('log-viewer.index'), shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-document-text')
+                    ->group('Système')
+                    ->sort(99)
+                    // Même règle que le reste de l'administration : un compte
+                    // désactivé dont la session reste ouverte n'y accède pas.
+                    ->visible(fn (): bool => (bool) auth()->user()?->actif),
             ])
             ->widgets([
                 // Le tableau de bord répond à « qu'est-ce que je dois faire

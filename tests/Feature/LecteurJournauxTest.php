@@ -4,102 +4,83 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
  * Lecteur de journaux.
  *
- * L'écran affichait ses clés de traduction brutes
- * (« log::filament-laravel-log.navigation.label ») au lieu des libellés. Le
- * paquet enregistre ses traductions sous l'espace de noms
- * « filament-laravel-log » mais les appelle sous « log » : aucune langue ne
- * fonctionnait, pas seulement le français.
- *
- * Les fichiers publiés dans lang/vendor/log/ comblent ce décalage et
- * survivent aux mises à jour de composer.
+ * Il vit sur sa propre route, hors du panneau Filament : sans porte, il
+ * serait accessible à quiconque connaît l'URL. Les journaux exposent des
+ * chemins du serveur, des extraits de code et parfois des données de requête.
  */
 class LecteurJournauxTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Les clés effectivement appelées par le paquet. */
-    private const CLES = [
-        'navigation.label',
-        'navigation.group',
-        'page.title',
-        'page.form.placeholder',
-        'actions.clear.label',
-        'actions.clear.modal.heading',
-        'actions.clear.modal.description',
-        'actions.refresh.label',
-        'actions.jumpToStart.label',
-        'actions.jumpToEnd.label',
-    ];
-
-    protected function setUp(): void
+    #[Test]
+    public function la_porte_est_definie(): void
     {
-        parent::setUp();
+        // Sans elle, le paquet laisse passer tout le monde hors production.
+        $this->assertTrue(Gate::has('viewLogViewer'));
+    }
 
+    #[Test]
+    public function un_administrateur_actif_y_accede(): void
+    {
         $this->actingAs(User::factory()->create(['actif' => true]));
+
+        $this->get('/log-viewer')->assertOk();
     }
 
     #[Test]
-    public function toutes_les_cles_sont_traduites_en_francais(): void
+    public function un_compte_desactive_est_refuse(): void
     {
-        app()->setLocale('fr');
+        // Un compte désactivé dont la session reste ouverte ne doit pas lire
+        // les journaux, au même titre qu'il ne peut plus ouvrir /admin.
+        $desactive = User::factory()->create(['actif' => false]);
 
-        foreach (self::CLES as $suffixe) {
-            $cle = 'log::filament-laravel-log.'.$suffixe;
-
-            $this->assertNotSame(
-                $cle,
-                __($cle),
-                "La clé « {$suffixe} » s’affiche brute au lieu de son libellé.",
-            );
-        }
+        $this->assertFalse(Gate::forUser($desactive)->allows('viewLogViewer'));
     }
 
     #[Test]
-    public function toutes_les_cles_sont_traduites_en_anglais(): void
+    public function un_visiteur_anonyme_est_refuse(): void
     {
-        // Le paquet fournit l'anglais, mais sous un espace de noms qu'il
-        // n'interroge jamais : la copie dans lang/vendor/log/ le rend
-        // atteignable.
-        app()->setLocale('en');
-
-        foreach (self::CLES as $suffixe) {
-            $cle = 'log::filament-laravel-log.'.$suffixe;
-
-            $this->assertNotSame($cle, __($cle), "Clé anglaise manquante : {$suffixe}");
-        }
+        $this->assertFalse(Gate::forUser(null)->allows('viewLogViewer'));
     }
 
     #[Test]
-    public function la_page_affiche_ses_libelles(): void
+    public function le_menu_de_l_administration_y_mene(): void
     {
-        $contenu = $this->get('/admin/logs')->assertOk()->getContent();
+        // Le lecteur étant hors du panneau, il faudrait sinon connaître l'URL
+        // par cœur.
+        $this->actingAs(User::factory()->create(['actif' => true]));
 
-        $this->assertStringNotContainsString(
-            'log::filament-laravel-log',
-            $contenu,
-            'Aucune clé brute ne doit apparaître à l’écran.',
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('log-viewer', false);
+    }
+
+    #[Test]
+    public function les_journaux_tournent_chaque_jour(): void
+    {
+        // Un laravel.log unique grossit sans fin et mélange toutes les dates :
+        // retrouver une erreur d'avant-hier devient une fouille.
+        $this->assertSame(
+            ['daily'],
+            config('logging.channels.stack.channels'),
         );
 
-        $this->assertStringContainsString('Journaux', $contenu);
-        $this->assertStringContainsString('Actualiser', $contenu);
+        $this->assertSame('daily', config('logging.channels.daily.driver'));
     }
 
     #[Test]
-    public function l_avertissement_de_suppression_est_explicite(): void
+    public function la_retention_des_journaux_est_bornee(): void
     {
-        // Vider un journal est irréversible : le texte doit le dire, pas
-        // seulement demander confirmation.
-        app()->setLocale('fr');
-
-        $this->assertStringContainsString(
-            'définitivement',
-            __('log::filament-laravel-log.actions.clear.modal.description'),
-        );
+        // Sans limite, les fichiers s'accumulent indéfiniment — l'espace est
+        // compté sur un hébergement mutualisé.
+        $this->assertGreaterThan(0, config('logging.channels.daily.max_files'));
+        $this->assertLessThanOrEqual(30, config('logging.channels.daily.max_files'));
     }
 }

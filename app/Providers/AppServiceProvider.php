@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Http\Middleware\SetLocale;
 use App\Models\Creation;
 use App\Models\Occasion;
+use App\Models\User;
 use App\Support\Traductions;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -25,6 +27,26 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->resoudreLesSlugs();
         $this->conserverLaLangueDansLivewire();
+        $this->protegerLeLecteurDeJournaux();
+    }
+
+    /**
+     * Restreint /log-viewer aux administrateurs actifs.
+     *
+     * Le lecteur s'installe sur sa propre route, hors du panneau Filament :
+     * sans cette porte, il serait accessible à quiconque connaît l'URL. Les
+     * journaux contiennent des traces d'exception — chemins du serveur,
+     * extraits de code, parfois des données de requête.
+     *
+     * « actif » et pas seulement « connecté » : un compte désactivé dont la
+     * session reste ouverte ne doit pas y accéder, au même titre qu'il ne peut
+     * plus ouvrir l'administration.
+     */
+    private function protegerLeLecteurDeJournaux(): void
+    {
+        Gate::define('viewLogViewer', function (?User $utilisateur): bool {
+            return (bool) $utilisateur?->actif;
+        });
     }
 
     /**

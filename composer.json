@@ -15,8 +15,8 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^3.8",
-        "ryangjchandler/laravel-cloudflare-turnstile": "^3.0",
-        "saade/filament-laravel-log": "^4.1"
+        "opcodesio/log-viewer": "^3.24",
+        "ryangjchandler/laravel-cloudflare-turnstile": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
