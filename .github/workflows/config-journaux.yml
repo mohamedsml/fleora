@@ -1,15 +1,15 @@
-name: Configurer les journaux quotidiens
+name: Archiver l'ancien journal
 
 on:
   workflow_dispatch:
 
 jobs:
-  configurer:
+  archiver:
     runs-on: ubuntu-latest
     environment:
       name: Hostinger Fleora
     steps:
-      - name: Activer la rotation quotidienne
+      - name: Basculer laravel.log vers un fichier daté
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -18,26 +18,17 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
             set -e
-            cd "${{ secrets.HOSTINGER_PATH }}"
-            PHP=/opt/alt/php83/usr/bin/php
+            cd "${{ secrets.HOSTINGER_PATH }}/storage/logs"
 
-            cp .env ".env.sauvegarde-$(date +%Y%m%d-%H%M%S)"
+            if [ ! -f laravel.log ]; then
+              echo "aucun laravel.log à archiver"
+              exit 0
+            fi
 
-            for ligne in "LOG_STACK=daily" "LOG_DAILY_DAYS=14"; do
-              cle="${ligne%%=*}"
-              if grep -qE "^${cle}=" .env; then
-                sed -i "s|^${cle}=.*|${ligne}|" .env
-              else
-                printf '%s\n' "$ligne" >> .env
-              fi
-            done
+            # Renommé plutôt que supprimé : il contient l'historique des
+            # erreurs déjà survenues, et le lecteur saura l'ouvrir comme les
+            # autres fichiers datés.
+            mv laravel.log "laravel-$(date -r laravel.log +%Y-%m-%d 2>/dev/null || date +%Y-%m-%d).log"
 
-            grep -n '^LOG_' .env
-
-            $PHP artisan config:clear >/dev/null
-            $PHP artisan config:cache >/dev/null
-            echo "caches reconstruits"
-
-            echo "--- état des journaux ---"
-            ls -lh storage/logs/*.log 2>/dev/null | tail -5 || echo "(aucun)"
-            du -sh storage/logs 2>/dev/null
+            echo "--- fichiers présents ---"
+            ls -lh *.log
