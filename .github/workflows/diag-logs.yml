@@ -9,7 +9,7 @@ jobs:
     environment:
       name: Hostinger Fleora
     steps:
-      - name: Erreurs récentes en production
+      - name: Pourquoi aucun fichier récent ?
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -17,16 +17,32 @@ jobs:
           port: ${{ secrets.HOSTINGER_PORT }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            cd "${{ secrets.HOSTINGER_PATH }}/storage/logs"
-            echo "--- fichiers ---"
-            ls -lh *.log 2>/dev/null | tail -5
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            PHP=/opt/alt/php83/usr/bin/php
+
+            echo "--- configuration effective ---"
+            $PHP -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+              printf("canal par defaut : %s\n", config("logging.default"));
+              printf("stack -> %s\n", implode(",", config("logging.channels.stack.channels")));
+              printf("niveau : %s\n", config("logging.channels.daily.level"));
+              printf("APP_DEBUG : %s\n", var_export(config("app.debug"), true));
+            '
+
             echo
-            echo "--- erreurs des 3 derniers jours ---"
-            for f in $(ls -t *.log 2>/dev/null | head -3); do
-              n=$(grep -c "\.ERROR:" "$f" 2>/dev/null || echo 0)
-              printf "%-28s %s erreur(s)\n" "$f" "$n"
-            done
+            echo "--- ecriture de test ---"
+            $PHP -r '
+              require "vendor/autoload.php"; $a = require "bootstrap/app.php";
+              $a->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+              Log::error("Essai de rotation depuis la production");
+              echo "ligne ecrite", PHP_EOL;
+            '
+
             echo
-            echo "--- dernières erreurs (extrait) ---"
-            grep -h "\.ERROR:" $(ls -t *.log 2>/dev/null | head -2) 2>/dev/null \
-              | tail -5 | cut -c1-150 || echo "(aucune)"
+            echo "--- fichiers apres ecriture ---"
+            ls -lh storage/logs/*.log | tail -4
+
+            echo
+            echo "--- droits du dossier ---"
+            ls -ld storage/logs
