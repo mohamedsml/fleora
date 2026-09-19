@@ -1,0 +1,32 @@
+name: Diagnostic journaux production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment:
+      name: Hostinger Fleora
+    steps:
+      - name: Erreurs récentes en production
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}/storage/logs"
+            echo "--- fichiers ---"
+            ls -lh *.log 2>/dev/null | tail -5
+            echo
+            echo "--- erreurs des 3 derniers jours ---"
+            for f in $(ls -t *.log 2>/dev/null | head -3); do
+              n=$(grep -c "\.ERROR:" "$f" 2>/dev/null || echo 0)
+              printf "%-28s %s erreur(s)\n" "$f" "$n"
+            done
+            echo
+            echo "--- dernières erreurs (extrait) ---"
+            grep -h "\.ERROR:" $(ls -t *.log 2>/dev/null | head -2) 2>/dev/null \
+              | tail -5 | cut -c1-150 || echo "(aucune)"
